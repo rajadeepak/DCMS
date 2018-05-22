@@ -134,7 +134,7 @@ public class LVLServer implements InterfaceRMI {
 		            ds.close();
 		            		
 		            String response = "DDO " +response1+ ",MTL " +response2+ ",LVL" +database.size();
-		            
+		            System.out.println(response1+" " + response2);
 		            return response;
 		             }
 		        catch(SocketException e) {

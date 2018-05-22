@@ -19,7 +19,7 @@ public class ManagerClient {
 	public static void main(String[] args) {
 	InterfaceRMI rmi_obj;
 	
-	
+	insertDefaultTRecord();
 	System.out.println("Enter manager id:");
 	Scanner sc=new Scanner(System.in);
 	String ManagerID=sc.next();
@@ -46,7 +46,7 @@ public class ManagerClient {
 		System.out.println("bloop");
 		rmi_obj=new DDOServer();
 	}
-
+	insertDefaultTRecord();
 	while(true)  {
 	System.out.println("1.Select from following operations:");
 	System.out.println("2.create teacher record:");
@@ -101,7 +101,27 @@ public class ManagerClient {
 		
 		
 	}
-
+	
+	private static void insertDefaultTRecord()
+	{
+		InterfaceRMI obj = new MTLServer();
+		obj.createTRecord("William", "Bradley", "4161 Duke Street", "5141111111", "Math", "Montreal");
+		obj.createTRecord("Anthony", "Hayes", "3631 Yonge Street", "5142222222", "Biology", "London");
+		obj.createTRecord("Alex", "Pearce", "4343 Camp Road", "5143333333", "History", "Quebec");
+		obj.createTRecord("Nathan", "Bowman", "4114 Alness Street", "5141231234", "Economics", "Rome");
+		
+		InterfaceRMI obj1 = new LVLServer();
+		obj1.createTRecord("Lucas", "May", "4604 Islington Ave", "4381111111", "English", "Laval");
+		obj1.createTRecord("Noel", "Parker", "1826 Davis Drive", "4382222222", "French", "Edmonton");
+		obj1.createTRecord("Hayden", "Davies", "629 Toy Avenue", "4383333333", "Arabic", "Toronto");
+		obj1.createTRecord("Quinn", "Jackson", "4917 Robson St", "4381231234", "Alabenian", "Laval");
+		
+		InterfaceRMI obj2 = new DDOServer();
+		obj2.createTRecord("Lucas", "May", "2570 rue Levy", "6141111111", "Geography", "Texas");
+		obj2.createTRecord("Sheldon", "Cooper", "2311 North Los Robles Avenue", "6142222222", "Physics", "Pasadena");
+		obj2.createTRecord("Toby", "Walker", "582  Wilkinson Court", "6143333333", "Mechanical", "Boston");
+		obj2.createTRecord("Thaddeus", "Berg", "2968  Meadow Drive", "6141231234", "Arts", "New York");
+	}
 
 	private static void get_inpput() {
 		// TODO Auto-generated method stub

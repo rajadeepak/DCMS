@@ -135,7 +135,7 @@ public class MTLServer implements InterfaceRMI {
 		            ds.close();
 		            		
 		            String response = "DDO " +response1+ ",LVL " +response2+ ",MTL" +database.size();
-		            
+		            System.out.println(response1+" " + response2);
 		            return response;
 		             }
 		        catch(SocketException e) {

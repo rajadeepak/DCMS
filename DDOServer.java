@@ -33,6 +33,7 @@ public class DDOServer implements InterfaceRMI {
 				byte[] blah = bloop.getBytes();
 				DatagramPacket reply = new DatagramPacket(blah, request.getLength(), request.getAddress(), request.getPort());
 				ddo.send(reply);
+				System.out.println("Inside DDO main");
 			}
 		}
 		
@@ -157,7 +158,7 @@ public class DDOServer implements InterfaceRMI {
 		DatagramSocket ds = null;
 		String response1, response2;
 		try {
-			String temp = Integer.toString(database.size());
+			String temp = "Database length";
 			//byte[] message = "Record Count".getBytes();
 			byte[] message = temp.getBytes();
 			byte[] buffer1 = new byte[1000];
@@ -168,7 +169,7 @@ public class DDOServer implements InterfaceRMI {
             DatagramPacket request = new DatagramPacket(message, message.length, aHost, MTLPort);
             ds.send(request);
             
-            
+            System.out.println("Inside DDO method");
             DatagramPacket reply1 = new DatagramPacket(buffer1, buffer1.length);
             ds.receive(reply1);
             response1 = new String(reply1.getData());
@@ -188,7 +189,8 @@ public class DDOServer implements InterfaceRMI {
             ds.close();
             		
             String response = "MTL " +response1+ ",LVL " +response2+ ",DDO" +database.size();
-            
+            System.out.println("Inside DDO method");
+            System.out.println(response1+" " + response2);
             return response;
              }
         catch(SocketException e) {
@@ -214,7 +216,7 @@ public class DDOServer implements InterfaceRMI {
 			for(Record e1 : e.getValue())
 				if(e1.Record_ID.equalsIgnoreCase(recordID))
 					bloop = e1.Last_name.substring(0, 1);
-			blah = database[bloop];
+//			blah = database[bloop];
 				
 		}
 		
