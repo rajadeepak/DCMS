@@ -8,5 +8,6 @@ public interface InterfaceRMI {
 	boolean createSRecord (String firstName, String lastName, String courseRegistered, String status, Date statusDate);
 	String getRecordCounts ();
 	boolean editRecord (String recordID, String fieldName, String newValue);
+	void getrecordcount();
 
 }
