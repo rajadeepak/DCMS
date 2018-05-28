@@ -9,29 +9,43 @@ import java.util.*;
 public class LVLServer implements InterfaceRMI {
 
 	static Map<String,List<Record>> database=new HashMap<String,List<Record>>();
-	List<Record> records;
+	private static int count=0;
+	static List<Record> records;
 	Record recobj;
 	private int MTLPort = 1412;
     private static int LVLPort = 7875;
     private int DDOPort = 7825;
-	
     public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		
 		DatagramSocket ddo = null;
-		
+		LVLServer lvl=new LVLServer();
+		System.out.println("Inside LVL Main");
 		try{
+			
 			ddo = new DatagramSocket(LVLPort);
 			byte[] buffer = new byte[1000];
 			
 			while(true){
+			
+
 				DatagramPacket request = new DatagramPacket(buffer, buffer.length);
 				ddo.receive(request);
-				String bloop = "LVL "+ database.size() + ", "; 
+				
+				String bloop = "LVL "+ 5 + ", "; 
+				lvl.getrecordcount();
+				System.out.println(" printing map");
+				for(Map.Entry<String, List<Record>> e : database.entrySet()){
+					   for(Record e1 : e.getValue())
+					      System.out.println(" printing map"+e.getKey() + " = "+ e1.First_name+" "+e1.Last_name+" "+e1.Record_ID);
+				}
+				System.out.println("LVL main SIZE OF DB IS "+count);
+				//System.out.println("In the lvlserver main"+bloop);
 				byte[] blah = bloop.getBytes();
-				DatagramPacket reply = new DatagramPacket(blah, request.getLength(), request.getAddress(), request.getPort());
+				DatagramPacket reply = new DatagramPacket(blah, blah.length, request.getAddress(), request.getPort());
 				ddo.send(reply);
-			}
+			
+		}
 		}
 		
 		catch(SocketException e){
@@ -52,7 +66,7 @@ public class LVLServer implements InterfaceRMI {
 		boolean flag = true;
 		try{	
 			String key=lastName.substring(0,1);
-			System.out.println(key);
+			//System.out.println(key);
 			recobj=new TeacherRecord(firstName, lastName, address, phone, specialization, location, "DDO"+database.size());
 			
 			if(database.containsKey(key)){
@@ -66,8 +80,15 @@ public class LVLServer implements InterfaceRMI {
 				records=new ArrayList<Record>();
 				records.add(recobj);
 				database.put(key, records);
+				
+			}
+			for(Map.Entry<String, List<Record>> e : database.entrySet()){
+			   for(Record e1 : e.getValue())
+			      System.out.println(e.getKey() + " = "+ e1.First_name+" "+e1.Last_name+" "+e1.Record_ID);
 			}
 			
+			count++;
+			System.out.println("size of LVL"+database.size());
 		}
 		catch(Exception e){
 			System.out.println(e);
@@ -132,9 +153,14 @@ public class LVLServer implements InterfaceRMI {
 		            response2 = new String(reply2.getData());
 		            
 		            ds.close();
-		            		
-		            String response = "DDO " +response1+ ",MTL " +response2+ ",LVL" +database.size();
-		            
+		            String tempp = database.size() + "";	
+		            System.out.println(tempp);
+		            String response;
+		            response = response1 + " ,"+ response2+ " ,LVL " + tempp;
+		            System.out.println("Inside LVL getRecord MEthod");
+		            System.out.println(response1 + "test5");
+		            System.out.println(response2 + "test5");
+		            System.out.println(response);
 		            return response;
 		             }
 		        catch(SocketException e) {
@@ -153,6 +179,11 @@ public class LVLServer implements InterfaceRMI {
 	public boolean editRecord(String recordID, String fieldName, String newValue) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+	@Override
+	public void getrecordcount() {
+		// TODO Auto-generated method stub
+		System.out.println("Record counts are"+database.size());
 	}
 
 }

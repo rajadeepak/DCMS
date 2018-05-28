@@ -10,30 +10,33 @@ import javax.sound.midi.Synthesizer;
 
 public class DDOServer implements InterfaceRMI {
 
-	static Map<String,List<Record>> database=new HashMap<String,List<Record>>();
+	static final Map<String,List<Record>> database=new HashMap<String,List<Record>>();
 	List<Record> records;
 	Record recobj;
 	private int MTLPort = 1412;
     private int LVLPort = 7875;
     private static int DDOPort = 7825;
-	
+    
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		
 		DatagramSocket ddo = null;
 		
 		try{
+			System.out.println("printing size first inside DDO"+database.size());
 			ddo = new DatagramSocket(DDOPort);
 			byte[] buffer = new byte[1000];
-			
 			while(true){
+				
+			System.out.println("Inside DDO Main");
 				DatagramPacket request = new DatagramPacket(buffer, buffer.length);
 				ddo.receive(request);
 				String bloop = "DDO "+ database.size() + ", "; 
 				byte[] blah = bloop.getBytes();
-				DatagramPacket reply = new DatagramPacket(blah, request.getLength(), request.getAddress(), request.getPort());
+				DatagramPacket reply = new DatagramPacket(blah,blah.length, request.getAddress(), request.getPort());
 				ddo.send(reply);
-			}
+			
+		}
 		}
 		
 		catch(SocketException e){
@@ -56,7 +59,7 @@ public class DDOServer implements InterfaceRMI {
 		boolean flag = true;
 		try{	
 			String key=lastName.substring(0,1);
-			System.out.println(key);
+			//System.out.println(key);
 			recobj=new TeacherRecord(firstName, lastName, address, phone, specialization, location, "TR"+ 1000+database.size());
 			
 			if(database.containsKey(key)){
@@ -71,7 +74,7 @@ public class DDOServer implements InterfaceRMI {
 				records.add(recobj);
 				database.put(key, records);
 			}
-			
+			System.out.println("size of ddo"+database.size());
 		}
 		catch(Exception e){
 			System.out.println(e);
@@ -82,10 +85,10 @@ public class DDOServer implements InterfaceRMI {
 			{
 				
 			}*/
-			for(Map.Entry<String, List<Record>> e : database.entrySet()){
+			/*for(Map.Entry<String, List<Record>> e : database.entrySet()){
 			   for(Record e1 : e.getValue())
 			      System.out.println(e.getKey() + " = "+ e1.First_name+" "+e1.Last_name+" "+e1.Record_ID);
-			}
+			}*/
 				
 			//write to log
 		}
@@ -108,7 +111,7 @@ public class DDOServer implements InterfaceRMI {
 		boolean flag = true;
 		try{	
 			String key=lastName.substring(0,1);
-			System.out.println(key);
+			//System.out.println(key);
 			recobj=new StudentRecord(firstName, lastName, "ST"+ 1000+database.size(), courseRegistered, status, statusDate);
 			
 			if(database.containsKey(key)){
@@ -134,10 +137,10 @@ public class DDOServer implements InterfaceRMI {
 			{
 				
 			}*/
-			for(Map.Entry<String, List<Record>> e : database.entrySet()){
+			/*for(Map.Entry<String, List<Record>> e : database.entrySet()){
 			   for(Record e1 : e.getValue())
 			      System.out.println(e.getKey() + " = "+ e1.First_name+" "+e1.Last_name+" "+e1.Record_ID);
-			}
+			}*/
 	
 				
 			//write to log
@@ -154,12 +157,14 @@ public class DDOServer implements InterfaceRMI {
 	@Override
 	public String getRecordCounts() {
 		// TODO Auto-generated method stub
+		
+		System.out.println("in getrecordcounts"+database.size());
 		DatagramSocket ds = null;
 		String response1, response2;
 		try {
-			String temp = Integer.toString(database.size());
-			//byte[] message = "Record Count".getBytes();
-			byte[] message = temp.getBytes();
+			//String temp = Integer.toString(database.size());
+			byte[] message = "Record Count".getBytes();
+			//byte[] message = temp.getBytes();
 			byte[] buffer1 = new byte[1000];
 			byte[] buffer2 = new byte[1000];
 			
@@ -172,7 +177,7 @@ public class DDOServer implements InterfaceRMI {
             DatagramPacket reply1 = new DatagramPacket(buffer1, buffer1.length);
             ds.receive(reply1);
             response1 = new String(reply1.getData());
-            
+            System.out.println("1st response inside DDO"+response1);
             ds.close();
             
             
@@ -184,11 +189,12 @@ public class DDOServer implements InterfaceRMI {
             DatagramPacket reply2 = new DatagramPacket(buffer2, buffer2.length);
             ds.receive(reply2);
             response2 = new String(reply2.getData());
-            
+            System.out.println("2nd response inside DDO"+response2);
             ds.close();
             		
-            String response = "MTL " +response1+ ",LVL " +response2+ ",DDO" +database.size();
-            
+            String response = response1+response2+ ",DDO" +database.size();
+            System.out.println("printing response"+response1+","+response2+ ",DDO" +database.size());
+            System.out.println("Inside DDO Method");
             return response;
              }
         catch(SocketException e) {
@@ -209,16 +215,30 @@ public class DDOServer implements InterfaceRMI {
 		
 		for(Map.Entry<String, List<Record>> e : database.entrySet())
 		{
-			String bloop;
+			String bloop = "";
 			List<Record> blah;
 			for(Record e1 : e.getValue())
 				if(e1.Record_ID.equalsIgnoreCase(recordID))
 					bloop = e1.Last_name.substring(0, 1);
-			blah = database[bloop];
+			
+			blah = database.get(bloop);
+			String bleep;
+			
+			for(int i=0; i<blah.size();i++ ){
+				System.out.println(blah.get(i));
+				if(blah.get(i).equals(fieldName))
+					System.out.println("Hurrayyyyy");
+			}
 				
 		}
 		
 		return false;
+	}
+
+	@Override
+	public void getrecordcount() {
+		// TODO Auto-generated method stub
+		System.out.println("Record counts are"+database.size());
 	}
 
 }
