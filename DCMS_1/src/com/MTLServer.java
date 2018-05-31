@@ -4,22 +4,34 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 
-public class MTLServer implements InterfaceRMI {
-	static final Map<String,List<Record>> database=new HashMap<String,List<Record>>();
+public class MTLServer extends UnicastRemoteObject implements InterfaceRMI {
+	protected MTLServer() throws RemoteException {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+	public static  Map<String,List<Record>> database=new HashMap<String,List<Record>>();
 	List<Record> records;
 	Record recobj;
 	private static int MTLPort = 1412;
     private int LVLPort = 7875;
     private int DDOPort = 7825;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
 		
 		DatagramSocket ddo = null;
 		
 		try{
+			MTLServer mts=new MTLServer();
+			Registry registry=LocateRegistry.createRegistry(1332);
+			registry.bind("MTLServer",mts );
+			System.out.println("MTL server started");
 			ddo = new DatagramSocket(MTLPort);
 			byte[] buffer = new byte[1000];
 			while(true)
@@ -27,7 +39,7 @@ public class MTLServer implements InterfaceRMI {
 			System.out.println("Inside MTL Main");
 				DatagramPacket request = new DatagramPacket(buffer, buffer.length);
 				ddo.receive(request);
-				String bloop = "MTL "+ database.size() + ", "; 
+				String bloop = "MTL "+ String.valueOf(database.size()) + ", "; 
 				System.out.println("In the MTLserver main"+bloop);
 				byte[] blah = bloop.getBytes();
 				DatagramPacket reply = new DatagramPacket(blah, blah.length, request.getAddress(), request.getPort());
@@ -47,7 +59,7 @@ public class MTLServer implements InterfaceRMI {
 		}
 	}
 	@Override
-	public boolean createTRecord(String firstName, String lastName, String address, String phone, String specialization,
+	public int createTRecord(String firstName, String lastName, String address, String phone, String specialization,
 			String location) {
 		// TODO Auto-generated method stub
 		boolean flag = true;
@@ -88,7 +100,7 @@ public class MTLServer implements InterfaceRMI {
 			   for(Record e1 : e.getValue())
 			      System.out.println(e.getKey() + " = "+ e1.First_name+" "+e1.Last_name+" "+e1.Record_ID);
 			}*/
-		return true;
+		return MTLServer.database.size();
 		
 		
 		
@@ -158,11 +170,9 @@ public class MTLServer implements InterfaceRMI {
 		return false;
 	}
 	@Override
-	public void getrecordcount() {
+	public int getrecordcount() {
 		// TODO Auto-generated method stub
-		
-		System.out.println("Record counts are"+database.size());
-		
+		return database.size();
 	}
 
 }

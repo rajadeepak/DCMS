@@ -4,55 +4,32 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 
 import javax.sound.midi.Synthesizer;
 
-public class DDOServer implements InterfaceRMI {
+public class DDOServer extends UnicastRemoteObject implements InterfaceRMI {
 
-	static final Map<String,List<Record>> database=new HashMap<String,List<Record>>();
+	protected DDOServer() throws RemoteException {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+	public static Map<String,List<Record>> database=new HashMap<String,List<Record>>();
 	List<Record> records;
+	private   int recordCount=0;
 	Record recobj;
 	private int MTLPort = 1412;
     private int LVLPort = 7875;
     private static int DDOPort = 7825;
     
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		
-		DatagramSocket ddo = null;
-		
-		try{
-			System.out.println("printing size first inside DDO"+database.size());
-			ddo = new DatagramSocket(DDOPort);
-			byte[] buffer = new byte[1000];
-			while(true){
-				
-			System.out.println("Inside DDO Main");
-				DatagramPacket request = new DatagramPacket(buffer, buffer.length);
-				ddo.receive(request);
-				String bloop = "DDO "+ database.size() + ", "; 
-				byte[] blah = bloop.getBytes();
-				DatagramPacket reply = new DatagramPacket(blah,blah.length, request.getAddress(), request.getPort());
-				ddo.send(reply);
-			
-		}
-		}
-		
-		catch(SocketException e){
-			System.out.println("Socket Exception: "+e);
-		}
-		catch(IOException e){
-			System.out.println("IO Exception: "+e);
-		}
-		finally{
-			if(ddo != null)
-				ddo.close();
-		}
-	}
-
+	
 	@Override
-	public boolean createTRecord(String firstName, String lastName, String address, String phone, String specialization,
+	public int createTRecord(String firstName, String lastName, String address, String phone, String specialization,
 			String location) {
 		// TODO Auto-generated method stub
 
@@ -60,21 +37,23 @@ public class DDOServer implements InterfaceRMI {
 		try{	
 			String key=lastName.substring(0,1);
 			//System.out.println(key);
-			recobj=new TeacherRecord(firstName, lastName, address, phone, specialization, location, "TR"+ 1000+database.size());
+			recobj=new TeacherRecord(firstName, lastName, address, phone, specialization, location, "TR"+ 1000+DDOServer.database.size());
 			
-			if(database.containsKey(key)){
-				records=database.get(key);
+			if(DDOServer.database.containsKey(key)){
+				records=DDOServer.database.get(key);
 				records.add(recobj);
-				database.put(key, records);
+				DDOServer.database.put(key, records);
+				recordCount++;
 				
 			}
 			
 			else{
 				records=new ArrayList<Record>();
 				records.add(recobj);
-				database.put(key, records);
+				DDOServer.database.put(key, records);
+				recordCount++;
 			}
-			System.out.println("size of ddo"+database.size());
+			System.out.println("size of ddo"+DDOServer.database.size());
 		}
 		catch(Exception e){
 			System.out.println(e);
@@ -97,7 +76,8 @@ public class DDOServer implements InterfaceRMI {
 			   for(Record e1 : e.getValue())
 			      System.out.println(e.getKey() + " = "+ e1.First_name+" "+e1.Last_name+" "+e1.Record_ID);
 			}*/
-		return true;
+	System.out.println("recordCount:"+ database.size());
+		return DDOServer.database.size();
 		
 		
 	
@@ -236,9 +216,48 @@ public class DDOServer implements InterfaceRMI {
 	}
 
 	@Override
-	public void getrecordcount() {
+	public int getrecordcount() {
 		// TODO Auto-generated method stub
-		System.out.println("Record counts are"+database.size());
+		return DDOServer.database.size();
+	}
+	
+	public static void main(String[] args) throws Exception {
+		// TODO Auto-generated method stub
+		
+		DatagramSocket ddo = null;
+		
+		
+		try{
+			DDOServer dds=new DDOServer();
+			Registry registry=LocateRegistry.createRegistry(2964);
+			registry.bind("DDOServer", dds);
+			System.out.println("DDO server started");
+			ddo = new DatagramSocket(DDOPort);
+			byte[] buffer = new byte[1000];
+			while(true){
+				DatagramPacket request = new DatagramPacket(buffer, buffer.length);
+				System.out.println("checking requt:"+request.getData().toString());
+				ddo.receive(request);
+				System.out.println(request.getPort()+""+request.toString());
+				String bloop = "DDO "+ String.valueOf(database.size()) + ", "; 
+				byte[] blah = bloop.getBytes();
+				DatagramPacket reply = new DatagramPacket(blah,blah.length, request.getAddress(), request.getPort());
+				ddo.send(reply);
+
+			}
+		}
+		
+		catch(SocketException e){
+			System.out.println("Socket Exception: "+e);
+		}
+		catch(IOException e){
+			System.out.println("IO Exception: "+e);
+		}
+		finally{
+			if(ddo != null)
+				ddo.close();
+		}
 	}
 
+	
 }

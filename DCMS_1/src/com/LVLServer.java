@@ -4,25 +4,36 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 
-public class LVLServer implements InterfaceRMI {
+public class LVLServer extends UnicastRemoteObject implements InterfaceRMI {
 
-	static Map<String,List<Record>> database=new HashMap<String,List<Record>>();
+	protected LVLServer() throws RemoteException {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+	public static Map<String,List<Record>> database=new HashMap<String,List<Record>>();
 	private static int count=0;
 	static List<Record> records;
 	Record recobj;
 	private int MTLPort = 1412;
     private static int LVLPort = 7875;
     private int DDOPort = 7825;
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
 		
 		DatagramSocket ddo = null;
-		LVLServer lvl=new LVLServer();
+		
 		System.out.println("Inside LVL Main");
 		try{
-			
+			LVLServer lvs=new LVLServer();
+			Registry registry=LocateRegistry.createRegistry(7878);
+			registry.bind("LVLServer", lvs);
+			System.out.println("LVL server started");
 			ddo = new DatagramSocket(LVLPort);
 			byte[] buffer = new byte[1000];
 			
@@ -33,7 +44,6 @@ public class LVLServer implements InterfaceRMI {
 				ddo.receive(request);
 				
 				String bloop = "LVL "+ 5 + ", "; 
-				lvl.getrecordcount();
 				System.out.println(" printing map");
 				for(Map.Entry<String, List<Record>> e : database.entrySet()){
 					   for(Record e1 : e.getValue())
@@ -60,7 +70,7 @@ public class LVLServer implements InterfaceRMI {
 		}
 	}
 	@Override
-	public boolean createTRecord(String firstName, String lastName, String address, String phone, String specialization,
+	public int createTRecord(String firstName, String lastName, String address, String phone, String specialization,
 			String location) {
 		// TODO Auto-generated method stub
 		boolean flag = true;
@@ -108,7 +118,8 @@ public class LVLServer implements InterfaceRMI {
 			   for(Record e1 : e.getValue())
 			      System.out.println(e.getKey() + " = "+ e1.First_name+" "+e1.Last_name+" "+e1.Record_ID);
 			}*/
-		return true;
+		System.out.println(LVLServer.database.size());
+		return LVLServer.database.size();
 		
 	}
 
@@ -124,9 +135,9 @@ public class LVLServer implements InterfaceRMI {
 				DatagramSocket ds = null;
 				String response1, response2;
 				try {
-					String temp = Integer.toString(database.size());
-					//byte[] message = "Record Count".getBytes();
-					byte[] message = temp.getBytes();
+					//String temp = Integer.toString(database.size());
+					byte[] message = "Record Count".getBytes();
+					//byte[] message = temp.getBytes();
 					byte[] buffer1 = new byte[1000];
 					byte[] buffer2 = new byte[1000];
 					
@@ -139,7 +150,7 @@ public class LVLServer implements InterfaceRMI {
 		            DatagramPacket reply1 = new DatagramPacket(buffer1, buffer1.length);
 		            ds.receive(reply1);
 		            response1 = new String(reply1.getData());
-		            
+		            System.out.println("Response::"+response1);
 		            ds.close();
 		            
 		            
@@ -181,9 +192,11 @@ public class LVLServer implements InterfaceRMI {
 		return false;
 	}
 	@Override
-	public void getrecordcount() {
+	public int getrecordcount() {
 		// TODO Auto-generated method stub
-		System.out.println("Record counts are"+database.size());
+		return database.size();
 	}
 
+	
+	
 }
