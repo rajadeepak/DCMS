@@ -9,5 +9,4 @@ public interface RequestServer extends Remote {
 	boolean createSRecord (String firstName, String lastName, String courseRegistered, String status, Date statusDate, String managerId) throws RemoteException;
 	String getRecordCounts (String managerId) throws RemoteException;
 	boolean editRecord (String recordID, String fieldName, String newValue, String managerId) throws RemoteException;
-	public int getrecordcount(String managerId) throws RemoteException;
 }

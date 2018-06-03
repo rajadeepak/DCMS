@@ -1,54 +1,54 @@
 package com;
 
-
-
-
-import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.text.DateFormat;
-
 import java.text.SimpleDateFormat;
-
-import java.util.*;
-
-
+import java.util.Date;
+import java.util.Scanner;
 
 
 public class ManagerClient {
 
+	static String First_name;
 
+	static String Last_name;
 
+	static String Address;
 
-	 static String First_name;
+	static String Phone;
 
-	 static String Last_name;
+	static String Specialization;
 
-	 static String Address;
+	static String Location;
 
-	 static String Phone;
+	static String CoursesRegistered;
 
-	 static String Specialization;
+	static String Status;
 
-	 static String Location;
+	static Date date;
 
-	 static  String CoursesRegistered;
-
-	 static String Status;
-
-	 static Date date;
-
-     static String ManagerID;
-     static Registry registry;
-     static InterfaceRMI server = null;
-     static int TrecordCount=0;
+	static String ManagerID;
+	
+	static Registry registry;
+	
+	static int TrecordCount = 0;
+	
+	static RequestServer rqServer = null;
+	
+	static String editRecordId;
+	
+	static String editFieldName;
+	
+	static String editFieldValue;
 
 	public static void main(String[] args) throws Exception {
-		
-		
+
 		default_inp();
-		 Scanner sc=new Scanner(System.in);
-			while(true)  {
+
+		Scanner sc = new Scanner(System.in);
+		
+		while (true) {
 
 			System.out.println("Select from following operations:");
 
@@ -61,121 +61,72 @@ public class ManagerClient {
 			System.out.println("4.Edit Record:");
 
 			System.out.println("5.Exit as the current manager:");
-			
+
 			System.out.println("6.logout:");
 
+			int user_choice = sc.nextInt();
 
-			int user_choice=sc.nextInt();
-
-			if(user_choice==1){
+			if (user_choice == 1) {
 
 				get_inpput();
-		        TrecordCount=(server.createTRecord(First_name, Last_name, Address, Phone, Specialization, Location));
+				TrecordCount = (rqServer.createTRecord(First_name, Last_name, Address, Phone, Specialization, Location, ManagerID));
 
 			}
 
-			else if(user_choice==2){
+			else if (user_choice == 2) {
 
 				get_studentinput();
 
-				server.createSRecord(First_name, Last_name, CoursesRegistered, Status, date);
+				rqServer.createSRecord(First_name, Last_name, CoursesRegistered, Status, date, ManagerID);
 
 			}
 
-			else if(user_choice==3){
+			else if (user_choice == 3) {
 
-				System.out.println(server.getRecordCounts());
+				System.out.println(rqServer.getRecordCounts(ManagerID));
 
 				System.out.println("BTEE");
 
-			}
-			else if(user_choice==4){
-				System.out.print(server.getrecordcount());
-			}
-			else if(user_choice==5){
+			} else if (user_choice == 4) {
+				
+				System.out.println("Enter record ID to edit : ");
+				
+				editRecordId = sc.nextLine();
+				
+				System.out.println("Enter field name to edit : ");
+				
+				editFieldName = sc.nextLine();
+				
+				System.out.println("Enter new value of field : ");
+				
+				editFieldValue = sc.nextLine();
+				
+				System.out.print(rqServer.editRecord(editRecordId, editFieldName, editFieldValue, ManagerID));
+			} else if (user_choice == 5) {
 				default_inp();
 			}
 
-
-	   }
+		}
 	}
-	
 
-  private static void default_inp() throws Exception{
-	  System.out.println("Enter manager id:");
-
-		 Scanner sc=new Scanner(System.in);
-
-		   ManagerID=sc.next();
-
+	private static void default_inp() throws Exception {
 		
+		System.out.println("Enter manager id:");
 
-		if(ManagerID.substring(0,3).equalsIgnoreCase("MTL")){
-			
-			registry = LocateRegistry.getRegistry(1332);
-        server = (InterfaceRMI)registry.lookup("MTLServer");
+		Scanner sc = new Scanner(System.in);
 
-			
+		ManagerID = sc.next();
 
-		}
-
-		else if(ManagerID.substring(0,3).equalsIgnoreCase("LVL")){
-
-			registry = LocateRegistry.getRegistry(7878);
-        server = (InterfaceRMI)registry.lookup("LVLServer");
-
+		registry = LocateRegistry.getRegistry(9001);
+		rqServer = (RequestServer) registry.lookup("RequestServer");
 		
+	}
 
-			
+	private static void init_val(InterfaceRMI rmi_obj) throws Exception {
 
-		}
+	}
 
-		else if(ManagerID.substring(0,3).equalsIgnoreCase("DDO")){
-
-			
-
-			registry = LocateRegistry.getRegistry(2964);
-        server = (InterfaceRMI)registry.lookup("DDOServer");
-
-		
-
-			
-
-		}
-
-		else
-
-		{
-
-			System.out.println("bloop");
-
-		}
-		
-		
-	
-  }
-
-
-	
-
-
-
-
-
-
-
-
-
-
-
-   private static void init_val(InterfaceRMI rmi_obj) throws Exception{
-	   
-	  
-   }
-
-
-
-	private static  void get_studentinput() {
+	private static void get_studentinput() {
 
 		// TODO Auto-generated method stub
 
@@ -183,94 +134,69 @@ public class ManagerClient {
 
 		DateFormat sourceFormat = new SimpleDateFormat("dd/MM/yyyy");
 
-		Scanner s=new Scanner(System.in);
-
-		
+		Scanner s = new Scanner(System.in);
 
 		System.out.println("Enter First Name");
 
-		First_name=s.nextLine();
-
-
-
+		First_name = s.nextLine();
 
 		System.out.println("Enter Last Name");
 
-		Last_name=s.nextLine();
-
-		
+		Last_name = s.nextLine();
 
 		System.out.println("Enter courses registered");
 
-		CoursesRegistered=s.nextLine();
-
-		
+		CoursesRegistered = s.nextLine();
 
 		System.out.println("Enter status");
 
-		Status=s.nextLine();
-
-		
+		Status = s.nextLine();
 
 		System.out.println("Enter Date");
 
-		bloop=s.nextLine();
+		bloop = s.nextLine();
 
-		try{
+		try {
 
 			date = sourceFormat.parse(bloop);
 
-		}catch(Exception e){
+		} catch (Exception e) {
 
 			System.out.println(e);
 
 		}
 
-		
-
-		
-
-		
-
 	}
 
-	
-
-	
-
-
-
-	private static  void get_inpput() {
+	private static void get_inpput() {
 
 		// TODO Auto-generated method stub
 
 		System.out.println("Enter First Name");
 
-		Scanner s=new Scanner(System.in);
+		Scanner s = new Scanner(System.in);
 
-		First_name=s.nextLine();
+		First_name = s.nextLine();
 
 		System.out.println("Enter Last Name");
 
-		Last_name=s.nextLine();
+		Last_name = s.nextLine();
 
 		System.out.println("Enter address");
 
-		Address=s.nextLine();
+		Address = s.nextLine();
 
 		System.out.println("Enter phone number");
 
-		Phone=s.nextLine();
+		Phone = s.nextLine();
 
 		System.out.println("Enter specialization");
 
-		Specialization=s.nextLine();
+		Specialization = s.nextLine();
 
 		System.out.println("Enter location");
 
-		Location=s.nextLine();
-
-		
+		Location = s.nextLine();
 
 	}
 

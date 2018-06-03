@@ -215,12 +215,6 @@ public class DDOServer extends UnicastRemoteObject implements InterfaceRMI {
 		return false;
 	}
 
-	@Override
-	public int getrecordcount() {
-		// TODO Auto-generated method stub
-		return DDOServer.database.size();
-	}
-	
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
 		

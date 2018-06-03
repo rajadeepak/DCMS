@@ -191,11 +191,7 @@ public class LVLServer extends UnicastRemoteObject implements InterfaceRMI {
 		// TODO Auto-generated method stub
 		return false;
 	}
-	@Override
-	public int getrecordcount() {
-		// TODO Auto-generated method stub
-		return database.size();
-	}
+	
 
 	
 	

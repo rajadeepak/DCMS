@@ -96,17 +96,6 @@ public class RequestServerEngine extends UnicastRemoteObject implements RequestS
 		return server.editRecord(recordID, fieldName, newValue);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.RequestServer#getrecordcount(java.lang.String)
-	 */
-	@Override
-	public int getrecordcount(String managerId) throws RemoteException {
-		InterfaceRMI server = locateServerForManager(managerId);
-		return server.getrecordcount();
-	}
-
 	private InterfaceRMI locateServerForManager(String managerId){
 		String center = managerId.substring(0, 3).toUpperCase();
 		switch(center){

@@ -10,6 +10,5 @@ public interface InterfaceRMI extends Remote {
 	boolean createSRecord (String firstName, String lastName, String courseRegistered, String status, Date statusDate) throws RemoteException;
 	String getRecordCounts () throws RemoteException;
 	boolean editRecord (String recordID, String fieldName, String newValue) throws RemoteException;
-	public int getrecordcount() throws RemoteException;
 
 }

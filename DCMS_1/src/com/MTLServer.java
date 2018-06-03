@@ -169,10 +169,5 @@ public class MTLServer extends UnicastRemoteObject implements InterfaceRMI {
 		// TODO Auto-generated method stub
 		return false;
 	}
-	@Override
-	public int getrecordcount() {
-		// TODO Auto-generated method stub
-		return database.size();
-	}
 
 }
