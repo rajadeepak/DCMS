@@ -138,10 +138,11 @@ public class LVLServer extends UnicastRemoteObject implements InterfaceRMI {
 				records.add(recobj);
 				database.put(key, records);
 			}
-			
+			logger.writeLog("Inserted Student Record Number : "+((StudentRecord)recobj).Record_ID);
 		}
 		catch(Exception e){
 			System.out.println(e);
+			logger.writeLog("Error occured while trying to insert student record number : "+((StudentRecord)recobj).Record_ID);
 			flag = false;
 		}
 		finally{
@@ -220,12 +221,13 @@ public class LVLServer extends UnicastRemoteObject implements InterfaceRMI {
 		                ds.close();
 		        }
 				
+				logger.writeLog("Current system records "+res);
 				return res;
 			}
 
 	@Override
 	public boolean editRecord(String recordID, String fieldName, String newValue) {
-		// TODO Auto-generated method stub
+		logger.writeLog("Update record number : "+recordID+"; new value of field : "+fieldName+" is : "+newValue);
 		return false;
 	}
 	public synchronized String getTeacherrecordid() {

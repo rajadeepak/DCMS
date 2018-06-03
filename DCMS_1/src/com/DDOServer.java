@@ -158,7 +158,7 @@ public class DDOServer extends UnicastRemoteObject implements InterfaceRMI {
         }
 		
 		
-		
+		logger.writeLog("Current system records "+result);
 		return result;
 	}
 

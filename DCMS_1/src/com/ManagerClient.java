@@ -11,42 +11,53 @@ import java.util.*;
 
 public class ManagerClient {
 
-	static String First_name;
+	String First_name;
 
-	static String Last_name;
+	String Last_name;
 
-	static String Address;
+	String Address;
 
-	static String Phone;
+	String Phone;
 
-	static String Specialization;
+	String Specialization;
 
-	static String Location;
+	String Location;
 
-	static String CoursesRegistered;
+	String CoursesRegistered;
 
-	static String Status;
+	String Status;
 
-	static Date date;
+	Date date;
 
-	static String ManagerID;
+	String ManagerID;
+
+	Registry registry;
+
+	int TrecordCount = 0;
+
+	RequestServer rqServer = null;
+
+	String RecordID;
+
+	String fieldName;
 	
-	static Registry registry;
+	String newValue;
+
+	LogManager logger;
 	
-	static int TrecordCount = 0;
-	
-	static RequestServer rqServer = null;
-	
- static String RecordID;
-	 
-	 static String fieldName;
-	 static String newValue;
 	public static void main(String[] args) throws Exception {
+		
+		ManagerClient mc = new ManagerClient();
+		mc.navigateMenu();
+	}
+
+	private void navigateMenu() throws Exception{
+
 
 		default_inp();
 
 		Scanner sc = new Scanner(System.in);
-		
+
 		while (true) {
 
 			System.out.println("Select from following operations:");
@@ -68,7 +79,9 @@ public class ManagerClient {
 			if (user_choice == 1) {
 
 				get_inpput();
-				TrecordCount = (rqServer.createTRecord(First_name, Last_name, Address, Phone, Specialization, Location, ManagerID));
+				TrecordCount = (rqServer.createTRecord(First_name, Last_name, Address, Phone, Specialization, Location,
+						ManagerID));
+				logger.writeLog("Manager : "+ManagerID+" created a teacher record");
 
 			}
 
@@ -78,49 +91,49 @@ public class ManagerClient {
 
 				rqServer.createSRecord(First_name, Last_name, CoursesRegistered, Status, date, ManagerID);
 
+				logger.writeLog("Manager : "+ManagerID+" created a student record");
+				
 			}
 
 			else if (user_choice == 3) {
 
-				ArrayList<String> res= rqServer.getRecordCounts(ManagerID);
-				for(int i=0;i<res.size();i++){
+				ArrayList<String> res = rqServer.getRecordCounts(ManagerID);
+				for (int i = 0; i < res.size(); i++) {
 					System.out.print(res.get(i));
 				}
-
+				
+				logger.writeLog("Manager "+ManagerID+" got record count : "+res);
 
 			} else if (user_choice == 4) {
-				
-				 get_editinp();
-				 System.out.print(rqServer.editRecord(RecordID, fieldName, newValue,ManagerID));
+
+				get_editinp();
+				System.out.print(rqServer.editRecord(RecordID, fieldName, newValue, ManagerID));
+				logger.writeLog("Manager "+ManagerID+" edited record number : "+RecordID+"; updated value of : "+fieldName+" is : "+newValue);
 			} else if (user_choice == 5) {
 				default_inp();
-			}
-			else if(user_choice==6){
+			} else if (user_choice == 6) {
 				System.out.println("GOODBYE!!");
 				System.exit(0);
 			}
 
 		}
+	
 	}
-
-
-  private static void get_editinp() {
-		// TODO Auto-generated method stub
-	      Scanner s=new Scanner(System.in);
+	
+	private void get_editinp() {
+		Scanner s = new Scanner(System.in);
 
 		System.out.println("Enter record id");
-		RecordID=s.nextLine();
+		RecordID = s.nextLine();
 		System.out.println("Enter field name ");
-		fieldName=s.nextLine();
+		fieldName = s.nextLine();
 		System.out.println("Enter new value that you want to update");
-		newValue=s.nextLine();
-	  
-		
+		newValue = s.nextLine();
+
 	}
 
+	private void default_inp() throws Exception {
 
-	private static void default_inp() throws Exception {
-		
 		System.out.println("Enter manager id:");
 
 		Scanner sc = new Scanner(System.in);
@@ -130,12 +143,12 @@ public class ManagerClient {
 		registry = LocateRegistry.getRegistry(9001);
 		rqServer = (RequestServer) registry.lookup("RequestServer");
 		
+		logger = new LogManager(ManagerID+"-client.log");
+
 	}
 
+	private void get_studentinput() {
 
-	private static void get_studentinput() {
-
-		// TODO Auto-generated method stub
 
 		String bloop;
 
@@ -175,7 +188,7 @@ public class ManagerClient {
 
 	}
 
-	private static void get_inpput() {
+	private void get_inpput() {
 
 		// TODO Auto-generated method stub
 
