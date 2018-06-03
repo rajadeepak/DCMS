@@ -9,6 +9,8 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -78,7 +80,7 @@ public class RequestServerEngine extends UnicastRemoteObject implements RequestS
 	 * @see com.RequestServer#getRecordCounts(java.lang.String)
 	 */
 	@Override
-	public String getRecordCounts(String managerId) throws RemoteException {
+	public ArrayList<String> getRecordCounts(String managerId) throws RemoteException {
 		InterfaceRMI server = locateServerForManager(managerId);
 		return server.getRecordCounts();
 	}
@@ -91,7 +93,7 @@ public class RequestServerEngine extends UnicastRemoteObject implements RequestS
 	 */
 	@Override
 	public boolean editRecord(String recordID, String fieldName, String newValue, String managerId)
-			throws RemoteException {
+			throws RemoteException,ParseException {
 		InterfaceRMI server = locateServerForManager(managerId);
 		return server.editRecord(recordID, fieldName, newValue);
 	}

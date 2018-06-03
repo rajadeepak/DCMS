@@ -11,9 +11,12 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 
 public class MTLServer extends UnicastRemoteObject implements InterfaceRMI {
-	protected MTLServer() throws RemoteException {
+	
+	private LogManager logger = null;
+	
+	protected MTLServer() throws RemoteException,IOException {
 		super();
-		// TODO Auto-generated constructor stub
+		logger = new LogManager("mtl-server.log");
 	}
 	public static  Map<String,List<Record>> database=new HashMap<String,List<Record>>();
 	List<Record> records;
@@ -32,15 +35,14 @@ public class MTLServer extends UnicastRemoteObject implements InterfaceRMI {
 			Registry registry=LocateRegistry.createRegistry(1332);
 			registry.bind("MTLServer",mts );
 			System.out.println("MTL server started");
-			ddo = new DatagramSocket(MTLPort);
-			byte[] buffer = new byte[1000];
+			
 			while(true)
 			{
-			System.out.println("Inside MTL Main");
+				ddo = new DatagramSocket(MTLPort);
+				byte[] buffer = new byte[1000];
 				DatagramPacket request = new DatagramPacket(buffer, buffer.length);
 				ddo.receive(request);
 				String bloop = "MTL "+ String.valueOf(database.size()) + ", "; 
-				System.out.println("In the MTLserver main"+bloop);
 				byte[] blah = bloop.getBytes();
 				DatagramPacket reply = new DatagramPacket(blah, blah.length, request.getAddress(), request.getPort());
 				ddo.send(reply);
@@ -66,7 +68,7 @@ public class MTLServer extends UnicastRemoteObject implements InterfaceRMI {
 		try{	
 			String key=lastName.substring(0,1);
 			//System.out.println(key);
-			recobj=new TeacherRecord(firstName, lastName, address, phone, specialization, location, "DDO"+database.size());
+			recobj=new TeacherRecord(firstName, lastName, address, phone, specialization, location,  getTeacherrecordid());
 			
 			if(database.containsKey(key)){
 				records=database.get(key);
@@ -80,10 +82,12 @@ public class MTLServer extends UnicastRemoteObject implements InterfaceRMI {
 				records.add(recobj);
 				database.put(key, records);
 			}
+			logger.writeLog("Inserted Teacher Record Number : "+((TeacherRecord)recobj).Record_ID);
 			System.out.println("size of LVL"+database.size());
 		}
 		catch(Exception e){
 			System.out.println(e);
+			logger.writeLog("Error occured while trying to insert teacher record number : "+((TeacherRecord)recobj).Record_ID);
 			flag = false;
 		}
 		finally{
@@ -109,14 +113,57 @@ public class MTLServer extends UnicastRemoteObject implements InterfaceRMI {
 	@Override
 	public boolean createSRecord(String firstName, String lastName, String courseRegistered, String status, Date statusDate) {
 		// TODO Auto-generated method stub
-		return false;
+		boolean flag = true;
+		try{	
+			String key=lastName.substring(0,1);
+			//System.out.println(key);
+			recobj=new StudentRecord(firstName, lastName, getstudentrecordid(), courseRegistered, status, statusDate);
+			
+			if(database.containsKey(key)){
+				records=database.get(key);
+				records.add(recobj);
+				database.put(key, records);
+				
+			}
+			
+			else{
+				records=new ArrayList<Record>();
+				records.add(recobj);
+				database.put(key, records);
+			}
+			
+		}
+		catch(Exception e){
+			System.out.println(e);
+			flag = false;
+		}
+		finally{
+			/*if (flag)
+			{
+				
+			}*/
+			/*for(Map.Entry<String, List<Record>> e : database.entrySet()){
+			   for(Record e1 : e.getValue())
+			      System.out.println(e.getKey() + " = "+ e1.First_name+" "+e1.Last_name+" "+e1.Record_ID);
+			}*/
+	
+				
+			//write to log
+		}
+		
+		/*for(Map.Entry<String, List<Record>> e : database.entrySet()){
+			   for(Record e1 : e.getValue())
+			      System.out.println(e.getKey() + " = "+ e1.First_name+" "+e1.Last_name+" "+e1.Record_ID);
+			}*/
+		return true;
 	}
 
 	@Override
-	public String getRecordCounts() {
+	public ArrayList<String> getRecordCounts() {
 		// TODO Auto-generated method stub
 				DatagramSocket ds = null;
 				String response1, response2;
+				ArrayList<String> res=new ArrayList<String>();
 				try {
 					String temp = Integer.toString(database.size());
 					//byte[] message = "Record Count".getBytes();
@@ -133,6 +180,7 @@ public class MTLServer extends UnicastRemoteObject implements InterfaceRMI {
 		            DatagramPacket reply1 = new DatagramPacket(buffer1, buffer1.length);
 		            ds.receive(reply1);
 		            response1 = new String(reply1.getData());
+		            res.add(response1.trim());
 		            
 		            ds.close();
 		            
@@ -145,23 +193,25 @@ public class MTLServer extends UnicastRemoteObject implements InterfaceRMI {
 		            DatagramPacket reply2 = new DatagramPacket(buffer2, buffer2.length);
 		            ds.receive(reply2);
 		            response2 = new String(reply2.getData());
+		            res.add(response2.trim());
 		            
 		            ds.close();
 		            		
-		            String response = "DDO " +response1+ ",LVL " +response2+ ",MTL" +database.size();
-		            System.out.println("Inside MTL Method");
-		            return response;
+		            String response = "MTL" +database.size();
+		           res.add(response);
+		           // return response;
 		             }
 		        catch(SocketException e) {
-		            return "Socket:" +e.getMessage();
+		            e.printStackTrace();
 		        }
 		        catch(IOException e) {
-		            return "IO:" +e.getMessage();
+		        	e.printStackTrace();
 		        }
 		        finally {
 		            if(ds!=null)
 		                ds.close();
 		        }
+				return res;
 			}
 
 	@Override
@@ -169,5 +219,12 @@ public class MTLServer extends UnicastRemoteObject implements InterfaceRMI {
 		// TODO Auto-generated method stub
 		return false;
 	}
-
+	public synchronized String getTeacherrecordid() {
+		// TODO Auto-generated method stub
+		return "TR"+ 1000+MTLServer.database.size();
+	}
+	public synchronized String getstudentrecordid() {
+		// TODO Auto-generated method stub
+		return "SR"+ 1000+MTLServer.database.size();
+	}
 }

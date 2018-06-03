@@ -7,6 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Scanner;
 
+import java.util.*;
 
 public class ManagerClient {
 
@@ -36,12 +37,10 @@ public class ManagerClient {
 	
 	static RequestServer rqServer = null;
 	
-	static String editRecordId;
-	
-	static String editFieldName;
-	
-	static String editFieldValue;
-
+ static String RecordID;
+	 
+	 static String fieldName;
+	 static String newValue;
 	public static void main(String[] args) throws Exception {
 
 		default_inp();
@@ -83,31 +82,42 @@ public class ManagerClient {
 
 			else if (user_choice == 3) {
 
-				System.out.println(rqServer.getRecordCounts(ManagerID));
+				ArrayList<String> res= rqServer.getRecordCounts(ManagerID);
+				for(int i=0;i<res.size();i++){
+					System.out.print(res.get(i));
+				}
 
-				System.out.println("BTEE");
 
 			} else if (user_choice == 4) {
 				
-				System.out.println("Enter record ID to edit : ");
-				
-				editRecordId = sc.nextLine();
-				
-				System.out.println("Enter field name to edit : ");
-				
-				editFieldName = sc.nextLine();
-				
-				System.out.println("Enter new value of field : ");
-				
-				editFieldValue = sc.nextLine();
-				
-				System.out.print(rqServer.editRecord(editRecordId, editFieldName, editFieldValue, ManagerID));
+				 get_editinp();
+				 System.out.print(rqServer.editRecord(RecordID, fieldName, newValue,ManagerID));
 			} else if (user_choice == 5) {
 				default_inp();
+			}
+			else if(user_choice==6){
+				System.out.println("GOODBYE!!");
+				System.exit(0);
 			}
 
 		}
 	}
+
+
+  private static void get_editinp() {
+		// TODO Auto-generated method stub
+	      Scanner s=new Scanner(System.in);
+
+		System.out.println("Enter record id");
+		RecordID=s.nextLine();
+		System.out.println("Enter field name ");
+		fieldName=s.nextLine();
+		System.out.println("Enter new value that you want to update");
+		newValue=s.nextLine();
+	  
+		
+	}
+
 
 	private static void default_inp() throws Exception {
 		
@@ -122,9 +132,6 @@ public class ManagerClient {
 		
 	}
 
-	private static void init_val(InterfaceRMI rmi_obj) throws Exception {
-
-	}
 
 	private static void get_studentinput() {
 
