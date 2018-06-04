@@ -8,7 +8,11 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.Map.Entry;
 
 public class MTLServer extends UnicastRemoteObject implements InterfaceRMI {
 	
@@ -69,7 +73,7 @@ public class MTLServer extends UnicastRemoteObject implements InterfaceRMI {
 			String key=lastName.substring(0,1);
 			//System.out.println(key);
 			recobj=new TeacherRecord(firstName, lastName, address, phone, specialization, location,  getTeacherrecordid());
-			
+			synchronized(this){
 			if(database.containsKey(key)){
 				records=database.get(key);
 				records.add(recobj);
@@ -83,7 +87,7 @@ public class MTLServer extends UnicastRemoteObject implements InterfaceRMI {
 				database.put(key, records);
 			}
 			logger.writeLog("Inserted Teacher Record Number : "+((TeacherRecord)recobj).Record_ID);
-			System.out.println("size of LVL"+database.size());
+			}
 		}
 		catch(Exception e){
 			System.out.println(e);
@@ -118,7 +122,7 @@ public class MTLServer extends UnicastRemoteObject implements InterfaceRMI {
 			String key=lastName.substring(0,1);
 			//System.out.println(key);
 			recobj=new StudentRecord(firstName, lastName, getstudentrecordid(), courseRegistered, status, statusDate);
-			
+			synchronized(this){
 			if(database.containsKey(key)){
 				records=database.get(key);
 				records.add(recobj);
@@ -131,7 +135,9 @@ public class MTLServer extends UnicastRemoteObject implements InterfaceRMI {
 				records.add(recobj);
 				database.put(key, records);
 			}
+			
 			logger.writeLog("Inserted Student Record Number : "+((StudentRecord)recobj).Record_ID);
+			}
 		}
 		catch(Exception e){
 			System.out.println(e);
@@ -217,9 +223,61 @@ public class MTLServer extends UnicastRemoteObject implements InterfaceRMI {
 			}
 
 	@Override
-	public boolean editRecord(String recordID, String fieldName, String newValue) {
-		logger.writeLog("Update record number : "+recordID+"; new value of field : "+fieldName+" is : "+newValue);
-		return false;
+	public boolean editRecord(String recordID, String fieldName, String newValue) throws ParseException {
+		synchronized(this){
+			 Iterator tr = database.entrySet().iterator();
+		        while(tr.hasNext()) {
+		            Entry ent = (Entry) tr.next();
+		            List<Record> recv = (List<Record>) ent.getValue();
+		                Iterator it = recv.iterator();
+		                while(it.hasNext()) {
+		                    Record rec = (Record) it.next();
+		                    if(fieldName.equalsIgnoreCase("address")) {
+		                        ((TeacherRecord) rec).updateAddress(newValue);
+		                        //return recordID+ "address is changed to" +newValue;
+		                    }
+		                    if(fieldName.equalsIgnoreCase("specialization")) {
+		                        ((TeacherRecord) rec).updateSpecialization(newValue);
+		                        //return recordID+ "specialization is changed to" +newValue;
+		                    }
+		                    if(fieldName.equalsIgnoreCase("location")) {
+		                        String c = ((TeacherRecord) rec).getLocation();
+		                        ((TeacherRecord) rec).updateLocation(newValue);
+		                        if(newValue.equalsIgnoreCase("DDO")) {
+		                            //recordCount++;
+		                        }
+		                        if(newValue.equalsIgnoreCase("LVL")) {
+		                            //recordCount--;
+		                        }
+		                        else {
+		                            //recordCount--;
+		                        }
+		                       // return recordID+ "location is changed from " +c+ "to" +newValue;
+		                    }
+		                    if(fieldName.equalsIgnoreCase("course")) {
+		                        //String[] val = newValue.split(",");
+		                       // String[] a = ((StudentRecord) rec).getCourse();
+		                        ((StudentRecord) rec).updateCourse(newValue);
+		                        //return recordID+ "course registeration is changed from " +a+ "to" +newValue;
+		                    }
+		                    if(fieldName.equalsIgnoreCase("status")) {
+		                        ((StudentRecord) rec).updateStatus(newValue);
+		                        String b = ((StudentRecord) rec).getStatus();
+		                        //return recordID+ "status is changed from " +b+ " to" +newValue;
+		                    }
+		                    if(fieldName.equalsIgnoreCase("statusdate")) {
+		                        DateFormat format = new SimpleDateFormat("dd/MM/yy");
+		                        Date d = format.parse(newValue);
+		                        ((StudentRecord) rec).updateStatusDate(d);
+		                        //return recordID+ "status date is changed to" +newValue;
+		                    }
+		                }
+		        }
+				
+		        logger.writeLog("Update record number : "+recordID+"; new value of field : "+fieldName+" is : "+newValue);
+			}
+
+		return true;
 	}
 	public synchronized String getTeacherrecordid() {
 		// TODO Auto-generated method stub

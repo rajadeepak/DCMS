@@ -74,6 +74,7 @@ public class DDOServer extends UnicastRemoteObject implements InterfaceRMI {
 			String key=lastName.substring(0,1);
 			recobj=new StudentRecord(firstName, lastName, getStudentRecordid(), courseRegistered, status, statusDate);
 			
+			synchronized(this){
 			if(database.containsKey(key)){
 				records=database.get(key);
 				records.add(recobj);
@@ -87,6 +88,7 @@ public class DDOServer extends UnicastRemoteObject implements InterfaceRMI {
 				database.put(key, records);
 			}
 			logger.writeLog("Inserted Student Record Number : "+((StudentRecord)recobj).Record_ID);
+		}
 		}
 		catch(Exception e){
 			e.printStackTrace();
@@ -165,7 +167,7 @@ public class DDOServer extends UnicastRemoteObject implements InterfaceRMI {
 	@Override
 	public boolean editRecord(String recordID, String fieldName, String newValue) throws ParseException {
 		// TODO Auto-generated method stub
-		
+		synchronized(this){
 		 Iterator tr = database.entrySet().iterator();
 	        while(tr.hasNext()) {
 	            Entry ent = (Entry) tr.next();
@@ -216,8 +218,8 @@ public class DDOServer extends UnicastRemoteObject implements InterfaceRMI {
 	        }
 			
 	        logger.writeLog("Update record number : "+recordID+"; new value of field : "+fieldName+" is : "+newValue);
-			
-	        return false;
+		}
+	        return true;
 			
 	}
 			
