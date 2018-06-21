@@ -4,9 +4,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
@@ -29,7 +26,7 @@ public class MTLServer extends DCMSPOA {
 	private ORB orb;
 	private static int ID = 10000;
 	private LogManager logger = null;
-	public static Map<String,List<Record>> database=new HashMap<String,List<Record>>();
+	public static volatile Map<String,List<Record>> database=new HashMap<String,List<Record>>();
 	List<Record> records;
 	Record recobj;
 	private static int MTLPort = 1412;
@@ -305,20 +302,20 @@ public class MTLServer extends DCMSPOA {
 		
 		DatagramSocket ddo = null;
 		try{
-			MTLServer dds=new MTLServer();
 			ddo = new DatagramSocket(MTLPort);
 			while(true){
 				String bloop = "empty";
 				byte[] buffer = new byte[1000];
 				DatagramPacket request = new DatagramPacket(buffer, buffer.length);
 				ddo.receive(request);
+				
 				if(data(buffer).toString().equals("getRecordCounts"))
 					bloop = "MTL "+ String.valueOf(database.size()) + ", "; 
 				
 				else if(data(buffer).toString().contains("transferRecord"))
 				{
 					MTLServer obj = new MTLServer();
-					String bleep = request.toString();
+					String bleep = data(buffer).toString();
 					String parts[] = bleep.split("::");
 					if(parts[2].startsWith("TR"))
 						bloop = obj.createTRecord(parts[1], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8]);

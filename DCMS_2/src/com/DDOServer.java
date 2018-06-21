@@ -4,27 +4,32 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.logging.Logger;
 
-import org.omg.CORBA.ORB;
+import org.omg.PortableServer.*;
+import org.omg.CORBA.*;
+import org.omg.PortableServer.POA;
 
 import CorbaApp.DCMSPOA;
+
+import org.omg.CosNaming.*;
+import org.omg.CosNaming.NamingContextPackage.*;
 
 public class DDOServer extends DCMSPOA {
 
 	private ORB orb;
 	private static int ID = 10000;
 	private LogManager logger = null;
-	public static Map<String,List<Record>> database=new HashMap<String,List<Record>>();
+	public static volatile Map<String,List<Record>> database=new HashMap<String,List<Record>>();
 	List<Record> records;
 	Record recobj;
 	private int MTLPort = 1412;
@@ -189,6 +194,7 @@ public class DDOServer extends DCMSPOA {
 	public String getRecordCounts(String ManagerID)
 	{
 		String s="DDO "+DDOServer.database.size()+" ";
+		
 		try {
 			byte[] message = "getRecordCounts".getBytes();
 			byte[] buffer1 = new byte[1000];
@@ -301,7 +307,6 @@ public class DDOServer extends DCMSPOA {
 		// TODO Auto-generated method stub
 		DatagramSocket ddo = null;
 		try{
-			DDOServer dds=new DDOServer();
 			
 			ddo = new DatagramSocket(DDOPort);
 			while(true){
@@ -316,7 +321,7 @@ public class DDOServer extends DCMSPOA {
 				else if(data(buffer).toString().contains("transferRecord"))
 				{
 					DDOServer obj = new DDOServer();
-					String bleep = request.toString();
+					String bleep = data(buffer).toString();
 					String parts[] = bleep.split("::");
 					if(parts[2].startsWith("TR"))
 						bloop = obj.createTRecord(parts[1], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8]);

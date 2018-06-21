@@ -5,27 +5,36 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import org.omg.CORBA.ORB;
+import org.omg.PortableServer.*;
+import org.omg.CORBA.*;
+import org.omg.PortableServer.POA;
 
 import CorbaApp.DCMSPOA;
+
+import org.omg.CosNaming.*;
+import org.omg.CosNaming.NamingContextPackage.*;
+
+import org.omg.CORBA.ORB;
 
 public class LVLServer extends DCMSPOA {
 
 	private ORB orb;
 	private static int ID = 10000;
 	private LogManager logger = null;
-	public static Map<String,List<Record>> database=new HashMap<String,List<Record>>();
+	public static volatile Map<String,List<Record>> database=new HashMap<String,List<Record>>();
 	List<Record> records;
 	Record recobj;
 	private int MTLPort = 1412;
@@ -60,8 +69,7 @@ public class LVLServer extends DCMSPOA {
 //	}	
 
     @Override
-    public String createTRecord(String ManagerID, String firstName, String lastName, String address, String phone,
-			String specialization, String location) 
+    public String createTRecord(String ManagerID, String firstName, String lastName, String address, String phone, String specialization, String location) 
 	{
 		try{	
 			String key=lastName.substring(0,1);
@@ -299,7 +307,7 @@ public class LVLServer extends DCMSPOA {
 		
 		DatagramSocket ddo = null;
 		try{
-			LVLServer dds=new LVLServer();
+			
 			ddo = new DatagramSocket(LVLPort);
 			while(true){
 				String bloop = "";
@@ -313,7 +321,7 @@ public class LVLServer extends DCMSPOA {
 				else if(data(buffer).toString().contains("transferRecord"))
 				{
 					LVLServer obj = new LVLServer();
-					String bleep = request.toString();
+					String bleep = data(buffer).toString();
 					String parts[] = bleep.split("::");
 					if(parts[2].startsWith("TR"))
 						bloop = obj.createTRecord(parts[1], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8]);
