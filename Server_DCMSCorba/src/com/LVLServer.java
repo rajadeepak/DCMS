@@ -5,29 +5,20 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import org.omg.PortableServer.*;
-import org.omg.CORBA.*;
-import org.omg.PortableServer.POA;
+import org.omg.CORBA.ORB;
 
 import CorbaApp.DCMSPOA;
-
-import org.omg.CosNaming.*;
-import org.omg.CosNaming.NamingContextPackage.*;
-
-import org.omg.CORBA.ORB;
 
 public class LVLServer extends DCMSPOA {
 
@@ -88,11 +79,11 @@ public class LVLServer extends DCMSPOA {
 					records.add(recobj);
 					LVLServer.database.put(key, records);
 				}
-				logger.writeLog("Inserted Teacher Record Number : "+ ((TeacherRecord)recobj).Record_ID);
+				logger.writeLog("Manager : "+ManagerID+";Inserted Teacher Record Number : "+ ((TeacherRecord)recobj).Record_ID);
 			}
 		}catch(Exception e){
 			e.printStackTrace();
-			logger.writeLog("Error occured while trying to insert teacher record number : "+((TeacherRecord)recobj).Record_ID);
+			logger.writeLog("Manager : "+ManagerID+";Error occured while trying to insert teacher record number : "+((TeacherRecord)recobj).Record_ID);
 			return "Failed";
 		}
 		return "Success";
@@ -118,11 +109,11 @@ public class LVLServer extends DCMSPOA {
 					records.add(recobj);
 					database.put(key, records);
 				}
-				logger.writeLog("Inserted Student Record Number : "+((StudentRecord)recobj).Record_ID);
+				logger.writeLog("Manager : "+ManagerID+";Inserted Student Record Number : "+((StudentRecord)recobj).Record_ID);
 			}
 		}catch(Exception e){
 			e.printStackTrace();
-			logger.writeLog("Error occured while trying to insert student record number : "+((StudentRecord)recobj).Record_ID);
+			logger.writeLog("Manager : "+ManagerID+";Error occured while trying to insert student record number : "+((StudentRecord)recobj).Record_ID);
 			return "Failed";
 		}
 		return "Success";
@@ -145,7 +136,7 @@ public class LVLServer extends DCMSPOA {
 						{
 							if(!newValue.equalsIgnoreCase("active") && !newValue.equalsIgnoreCase("inactive"))
 							{
-								logger.writeLog(fieldName +"could not be updated to "+ newValue +" value must be either active/inactive");
+								logger.writeLog("Manager : "+ManagerID+";"+fieldName +"could not be updated to "+ newValue +" value must be either active/inactive");
 								return "Failed";
 							}
 							else
@@ -157,7 +148,7 @@ public class LVLServer extends DCMSPOA {
 							((StudentRecord)e).CoursesRegistered=newValue;
 						else 
 						{
-							logger.writeLog("invalid field:  "+fieldName +" for the StudentRecord");
+							logger.writeLog("Manager : "+ManagerID+";invalid field:  "+fieldName +" for the StudentRecord");
 							return "Failed";
 						}
 					}
@@ -167,7 +158,7 @@ public class LVLServer extends DCMSPOA {
 						{
 							if(!newValue.equalsIgnoreCase("lvl") && !newValue.equalsIgnoreCase("mtl") && !newValue.equalsIgnoreCase("ddo"))
 							{
-								logger.writeLog(fieldName +"could not be updated to "+ newValue +" value must be either mtl/ddo/lvl");
+								logger.writeLog("Manager : "+ManagerID+";"+fieldName +"could not be updated to "+ newValue +" value must be either mtl/ddo/lvl");
 								return "Failed";
 							}
 							else
@@ -179,7 +170,7 @@ public class LVLServer extends DCMSPOA {
 							((TeacherRecord)e).Phone=newValue;
 						else 
 						{
-							logger.writeLog("invalid field:  "+fieldName +" for the TeacherRecord");
+							logger.writeLog("Manager : "+ManagerID+";invalid field:  "+fieldName +" for the TeacherRecord");
 							return "Failed";
 						}
 					}
@@ -188,7 +179,7 @@ public class LVLServer extends DCMSPOA {
 			}
 		if(!flag)
 		{
-			logger.writeLog("RecordID:  "+recordID +" Not Found in this server");
+			logger.writeLog("Manager : "+ManagerID+";RecordID:  "+recordID +" Not Found in this server");
 			return "Failed";
 		}
 	        return "Success";
@@ -242,7 +233,7 @@ public class LVLServer extends DCMSPOA {
 			e.printStackTrace();
 		}
 		
-		logger.writeLog("Current system records "+s);
+		logger.writeLog("Manager : "+ManagerID+";Current system records "+s);
 		return s;
 	}
 	
@@ -309,7 +300,6 @@ public class LVLServer extends DCMSPOA {
 		DatagramSocket ddo = null;
 		try{
 			LVLServer dds=new LVLServer();
-			System.out.println("LVL server started");
 			ddo = new DatagramSocket(LVLPort);
 			while(true){
 				String bloop = "";
@@ -349,8 +339,6 @@ public class LVLServer extends DCMSPOA {
 	}
 	
 	private static StringBuilder data(byte[] a) {
-		// TODO Auto-generated method stub
-		
 		
 		if(a==null)
 		return null;

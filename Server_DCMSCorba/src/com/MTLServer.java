@@ -84,11 +84,11 @@ public class MTLServer extends DCMSPOA {
 					records.add(recobj);
 					MTLServer.database.put(key, records);
 				}
-				logger.writeLog("Inserted Teacher Record Number : "+ ((TeacherRecord)recobj).Record_ID);
+				logger.writeLog("Manager : "+ManagerID+";Inserted Teacher Record Number : "+ ((TeacherRecord)recobj).Record_ID);
 			}
 		}catch(Exception e){
 			e.printStackTrace();
-			logger.writeLog("Error occured while trying to insert teacher record number : "+((TeacherRecord)recobj).Record_ID);
+			logger.writeLog("Manager : "+ManagerID+";Error occured while trying to insert teacher record number : "+((TeacherRecord)recobj).Record_ID);
 			return "Failed";
 		}
 		return "Success";
@@ -114,11 +114,11 @@ public class MTLServer extends DCMSPOA {
 					records.add(recobj);
 					database.put(key, records);
 				}
-				logger.writeLog("Inserted Student Record Number : "+((StudentRecord)recobj).Record_ID);
+				logger.writeLog("Manager : "+ManagerID+";Inserted Student Record Number : "+((StudentRecord)recobj).Record_ID);
 			}
 		}catch(Exception e){
 			e.printStackTrace();
-			logger.writeLog("Error occured while trying to insert student record number : "+((StudentRecord)recobj).Record_ID);
+			logger.writeLog("Manager : "+ManagerID+";Error occured while trying to insert student record number : "+((StudentRecord)recobj).Record_ID);
 			return "Failed";
 		}
 		return "Success";
@@ -141,7 +141,7 @@ public class MTLServer extends DCMSPOA {
 						{
 							if(!newValue.equalsIgnoreCase("active") && !newValue.equalsIgnoreCase("inactive"))
 							{
-								logger.writeLog(fieldName +"could not be updated to "+ newValue +" value must be either active/inactive");
+								logger.writeLog("Manager : "+ManagerID+";"+fieldName +"could not be updated to "+ newValue +" value must be either active/inactive");
 								return "Failed";
 							}
 							else
@@ -153,7 +153,7 @@ public class MTLServer extends DCMSPOA {
 							((StudentRecord)e).CoursesRegistered=newValue;
 						else 
 						{
-							logger.writeLog("invalid field:  "+fieldName +" for the StudentRecord");
+							logger.writeLog("Manager : "+ManagerID+";invalid field:  "+fieldName +" for the StudentRecord");
 							return "Failed";
 						}
 					}
@@ -163,7 +163,7 @@ public class MTLServer extends DCMSPOA {
 						{
 							if(!newValue.equalsIgnoreCase("lvl") && !newValue.equalsIgnoreCase("mtl") && !newValue.equalsIgnoreCase("ddo"))
 							{
-								logger.writeLog(fieldName +"could not be updated to "+ newValue +" value must be either mtl/ddo/lvl");
+								logger.writeLog("Manager : "+ManagerID+";"+fieldName +"could not be updated to "+ newValue +" value must be either mtl/ddo/lvl");
 								return "Failed";
 							}
 							else
@@ -175,7 +175,7 @@ public class MTLServer extends DCMSPOA {
 							((TeacherRecord)e).Phone=newValue;
 						else 
 						{
-							logger.writeLog("invalid field:  "+fieldName +" for the TeacherRecord");
+							logger.writeLog("Manager : "+ManagerID+";invalid field:  "+fieldName +" for the TeacherRecord");
 							return "Failed";
 						}
 					}
@@ -184,7 +184,7 @@ public class MTLServer extends DCMSPOA {
 			}
 		if(!flag)
 		{
-			logger.writeLog("RecordID:  "+recordID +" Not Found in this server");
+			logger.writeLog("Manager : "+ManagerID+";RecordID:  "+recordID +" Not Found in this server");
 			return "Failed";
 		}
 	        return "Success";
@@ -239,7 +239,7 @@ public class MTLServer extends DCMSPOA {
 			e.printStackTrace();
 		}
 		
-		logger.writeLog("Current system records "+s);
+		logger.writeLog("Manager : "+ManagerID+";Current system records "+s);
 		return s;
 	}
 	
@@ -307,16 +307,11 @@ public class MTLServer extends DCMSPOA {
 		try{
 			MTLServer dds=new MTLServer();
 			ddo = new DatagramSocket(MTLPort);
-			System.out.println("MTL server started");
-			System.out.println("Inside MTL Main");
-            dds.logger.writeLog("Inside MTL Main");
 			while(true){
 				String bloop = "empty";
-				System.out.println("Inside MTL while()");
 				byte[] buffer = new byte[1000];
 				DatagramPacket request = new DatagramPacket(buffer, buffer.length);
 				ddo.receive(request);
-				System.out.println("Request received: "+request.toString());
 				if(data(buffer).toString().equals("getRecordCounts"))
 					bloop = "MTL "+ String.valueOf(database.size()) + ", "; 
 				
@@ -334,7 +329,6 @@ public class MTLServer extends DCMSPOA {
 				byte[] blah = bloop.getBytes();
 				DatagramPacket reply = new DatagramPacket(blah,blah.length, request.getAddress(), request.getPort());
 				ddo.send(reply);
-				System.out.println("Reply sent"+reply.toString());
 				
 			}
 		}catch(SocketException e){

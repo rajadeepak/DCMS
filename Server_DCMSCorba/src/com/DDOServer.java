@@ -4,25 +4,20 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.logging.Logger;
 
-import org.omg.PortableServer.*;
-import org.omg.CORBA.*;
-import org.omg.PortableServer.POA;
+import org.omg.CORBA.ORB;
 
 import CorbaApp.DCMSPOA;
-
-import org.omg.CosNaming.*;
-import org.omg.CosNaming.NamingContextPackage.*;
 
 public class DDOServer extends DCMSPOA {
 
@@ -84,11 +79,11 @@ public class DDOServer extends DCMSPOA {
 					records.add(recobj);
 					DDOServer.database.put(key, records);
 				}
-				logger.writeLog("Inserted Teacher Record Number : "+ ((TeacherRecord)recobj).Record_ID);
+				logger.writeLog("Manager : "+ManagerID+";Inserted Teacher Record Number : "+ ((TeacherRecord)recobj).Record_ID);
 			}
 		}catch(Exception e){
 			e.printStackTrace();
-			logger.writeLog("Error occured while trying to insert teacher record number : "+((TeacherRecord)recobj).Record_ID);
+			logger.writeLog("Manager : "+ManagerID+";Error occured while trying to insert teacher record number : "+((TeacherRecord)recobj).Record_ID);
 			return "Failed";
 		}
 		return "Success";
@@ -114,11 +109,11 @@ public class DDOServer extends DCMSPOA {
 					records.add(recobj);
 					database.put(key, records);
 				}
-				logger.writeLog("Inserted Student Record Number : "+((StudentRecord)recobj).Record_ID);
+				logger.writeLog("Manager : "+ManagerID+";Inserted Student Record Number : "+((StudentRecord)recobj).Record_ID);
 			}
 		}catch(Exception e){
 			e.printStackTrace();
-			logger.writeLog("Error occured while trying to insert student record number : "+((StudentRecord)recobj).Record_ID);
+			logger.writeLog("Manager : "+ManagerID+";Error occured while trying to insert student record number : "+((StudentRecord)recobj).Record_ID);
 			return "Failed";
 		}
 		return "Success";
@@ -141,7 +136,7 @@ public class DDOServer extends DCMSPOA {
 						{
 							if(!newValue.equalsIgnoreCase("active") && !newValue.equalsIgnoreCase("inactive"))
 							{
-								logger.writeLog(fieldName +"could not be updated to "+ newValue +" value must be either active/inactive");
+								logger.writeLog("Manager : "+ManagerID+";"+fieldName +"could not be updated to "+ newValue +" value must be either active/inactive");
 								return "Failed";
 							}
 							else
@@ -153,7 +148,7 @@ public class DDOServer extends DCMSPOA {
 							((StudentRecord)e).CoursesRegistered=newValue;
 						else 
 						{
-							logger.writeLog("invalid field:  "+fieldName +" for the StudentRecord");
+							logger.writeLog("Manager : "+ManagerID+";invalid field:  "+fieldName +" for the StudentRecord");
 							return "Failed";
 						}
 					}
@@ -163,7 +158,7 @@ public class DDOServer extends DCMSPOA {
 						{
 							if(!newValue.equalsIgnoreCase("lvl") && !newValue.equalsIgnoreCase("mtl") && !newValue.equalsIgnoreCase("ddo"))
 							{
-								logger.writeLog(fieldName +"could not be updated to "+ newValue +" value must be either mtl/ddo/lvl");
+								logger.writeLog("Manager : "+ManagerID+";"+fieldName +"could not be updated to "+ newValue +" value must be either mtl/ddo/lvl");
 								return "Failed";
 							}
 							else
@@ -175,7 +170,7 @@ public class DDOServer extends DCMSPOA {
 							((TeacherRecord)e).Phone=newValue;
 						else 
 						{
-							logger.writeLog("invalid field:  "+fieldName +" for the TeacherRecord");
+							logger.writeLog("Manager : "+ManagerID+";invalid field:  "+fieldName +" for the TeacherRecord");
 							return "Failed";
 						}
 					}
@@ -184,7 +179,7 @@ public class DDOServer extends DCMSPOA {
 			}
 		if(!flag)
 		{
-			logger.writeLog("RecordID:  "+recordID +" Not Found in this server");
+			logger.writeLog("Manager : "+ManagerID+";RecordID:  "+recordID +" Not Found in this server");
 			return "Failed";
 		}
 	        return "Success";
@@ -194,7 +189,6 @@ public class DDOServer extends DCMSPOA {
 	public String getRecordCounts(String ManagerID)
 	{
 		String s="DDO "+DDOServer.database.size()+" ";
-		System.out.println("inside getRecordCounts()");
 		try {
 			byte[] message = "getRecordCounts".getBytes();
 			byte[] buffer1 = new byte[1000];
@@ -208,11 +202,9 @@ public class DDOServer extends DCMSPOA {
 					InetAddress aHost = InetAddress.getByName("localhost");
 					DatagramPacket request = new DatagramPacket(message, message.length, aHost, MTLPort);
 					ds.send(request);
-					System.out.println("Request sent : "+request);
 					DatagramPacket reply1 = new DatagramPacket(buffer1, buffer1.length);
 					ds.receive(reply1);
 					String response1 = new String(reply1.getData());
-					System.out.println("Response received: "+response1);
 					String a = response1.trim();
 					ds.close();
 					return a;
@@ -232,7 +224,6 @@ public class DDOServer extends DCMSPOA {
 					DatagramPacket reply2 = new DatagramPacket(buffer2, buffer2.length);
 					ds.receive(reply2);
 					String response2= new String(reply2.getData());
-					System.out.println("Response received: "+response2);
 					ds.close();
 					String b = response2.trim();
 					return b;
@@ -244,7 +235,7 @@ public class DDOServer extends DCMSPOA {
 			e.printStackTrace();
 		}
 		
-		logger.writeLog("Current system records "+s);
+		logger.writeLog("Manager : "+ManagerID+";Current system records "+s);
 		return s;
 	}
 	
@@ -261,7 +252,6 @@ public class DDOServer extends DCMSPOA {
 		fullRecord = fetchRecord(recordID);
 		String msg = "transferRecord::" + managerID + "::" + fullRecord;
 		
-		System.out.println(msg);
 		if(remoteServerName.equalsIgnoreCase("MTL"))
 			port = MTLPort;
 		else
@@ -309,7 +299,6 @@ public class DDOServer extends DCMSPOA {
 
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
-		System.out.println("DDO server started");
 		DatagramSocket ddo = null;
 		try{
 			DDOServer dds=new DDOServer();
