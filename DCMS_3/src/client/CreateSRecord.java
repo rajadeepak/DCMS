@@ -3,6 +3,7 @@ package client;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 
@@ -16,12 +17,12 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="arg0" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="arg1" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="arg2" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="arg3" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="arg4" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="arg5" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="ManagerID" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="FirstName" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="LastName" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="CoursesRegistered" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="Status" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="StatusDate" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -32,164 +33,170 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "createSRecord", propOrder = {
-    "arg0",
-    "arg1",
-    "arg2",
-    "arg3",
-    "arg4",
-    "arg5"
+    "managerID",
+    "firstName",
+    "lastName",
+    "coursesRegistered",
+    "status",
+    "statusDate"
 })
 public class CreateSRecord {
 
-    protected String arg0;
-    protected String arg1;
-    protected String arg2;
-    protected String arg3;
-    protected String arg4;
-    protected String arg5;
+    @XmlElement(name = "ManagerID")
+    protected String managerID;
+    @XmlElement(name = "FirstName")
+    protected String firstName;
+    @XmlElement(name = "LastName")
+    protected String lastName;
+    @XmlElement(name = "CoursesRegistered")
+    protected String coursesRegistered;
+    @XmlElement(name = "Status")
+    protected String status;
+    @XmlElement(name = "StatusDate")
+    protected String statusDate;
 
     /**
-     * Gets the value of the arg0 property.
+     * Gets the value of the managerID property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getArg0() {
-        return arg0;
+    public String getManagerID() {
+        return managerID;
     }
 
     /**
-     * Sets the value of the arg0 property.
+     * Sets the value of the managerID property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setArg0(String value) {
-        this.arg0 = value;
+    public void setManagerID(String value) {
+        this.managerID = value;
     }
 
     /**
-     * Gets the value of the arg1 property.
+     * Gets the value of the firstName property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getArg1() {
-        return arg1;
+    public String getFirstName() {
+        return firstName;
     }
 
     /**
-     * Sets the value of the arg1 property.
+     * Sets the value of the firstName property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setArg1(String value) {
-        this.arg1 = value;
+    public void setFirstName(String value) {
+        this.firstName = value;
     }
 
     /**
-     * Gets the value of the arg2 property.
+     * Gets the value of the lastName property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getArg2() {
-        return arg2;
+    public String getLastName() {
+        return lastName;
     }
 
     /**
-     * Sets the value of the arg2 property.
+     * Sets the value of the lastName property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setArg2(String value) {
-        this.arg2 = value;
+    public void setLastName(String value) {
+        this.lastName = value;
     }
 
     /**
-     * Gets the value of the arg3 property.
+     * Gets the value of the coursesRegistered property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getArg3() {
-        return arg3;
+    public String getCoursesRegistered() {
+        return coursesRegistered;
     }
 
     /**
-     * Sets the value of the arg3 property.
+     * Sets the value of the coursesRegistered property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setArg3(String value) {
-        this.arg3 = value;
+    public void setCoursesRegistered(String value) {
+        this.coursesRegistered = value;
     }
 
     /**
-     * Gets the value of the arg4 property.
+     * Gets the value of the status property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getArg4() {
-        return arg4;
+    public String getStatus() {
+        return status;
     }
 
     /**
-     * Sets the value of the arg4 property.
+     * Sets the value of the status property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setArg4(String value) {
-        this.arg4 = value;
+    public void setStatus(String value) {
+        this.status = value;
     }
 
     /**
-     * Gets the value of the arg5 property.
+     * Gets the value of the statusDate property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getArg5() {
-        return arg5;
+    public String getStatusDate() {
+        return statusDate;
     }
 
     /**
-     * Sets the value of the arg5 property.
+     * Sets the value of the statusDate property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setArg5(String value) {
-        this.arg5 = value;
+    public void setStatusDate(String value) {
+        this.statusDate = value;
     }
 
 }

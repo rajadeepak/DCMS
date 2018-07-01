@@ -16,7 +16,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.jws.WebParam;
 import javax.jws.WebService;
 
 
@@ -24,7 +23,7 @@ import javax.jws.WebService;
 
 @WebService(endpointInterface="com.DCMSInterface")
 
-public class DDOImpl {
+public class LVLImpl {
 
 	private static int ID = 10000;
 	private LogManager logger = null;
@@ -32,13 +31,13 @@ public class DDOImpl {
 	List<Record> records;
 	Record recobj;
 	private int MTLPort = 1412;
-    private int LVLPort = 7875;
-    private static int DDOPort = 7825;
+    private static int LVLPort = 7875;
+    private int DDOPort = 7825;
     ExecutorService exec = Executors.newFixedThreadPool(10);
-	 public DDOImpl() throws IOException 
+	 public LVLImpl() throws IOException 
 	    {
 	    	super();
-			logger = new LogManager("ddo-server.log");
+			logger = new LogManager("lvl-server.log");
 		}
 
 	    public synchronized int genID()
@@ -56,15 +55,15 @@ public class DDOImpl {
 				recobj=new TeacherRecord(firstName, lastName, address, phone, specialization, location, id);
 				
 				synchronized(this) {
-					if(DDOImpl.database.containsKey(key)){
-						records=DDOImpl.database.get(key);
+					if(LVLImpl.database.containsKey(key)){
+						records=LVLImpl.database.get(key);
 						records.add(recobj);
-						DDOImpl.database.put(key, records);
+						LVLImpl.database.put(key, records);
 					}
 					else{
 						records=new ArrayList<Record>();
 						records.add(recobj);
-						DDOImpl.database.put(key, records);
+						LVLImpl.database.put(key, records);
 					}
 					logger.writeLog("Inserted Teacher Record Number : "+ ((TeacherRecord)recobj).Record_ID);
 				}
@@ -173,7 +172,7 @@ public class DDOImpl {
 		
 		public String getRecordCounts(String ManagerID)
 		{
-			String s="DDO "+DDOImpl.database.size()+" ";
+			String s="LVL "+LVLImpl.database.size()+" ";
 			
 			try {
 				byte[] message = "getRecordCounts".getBytes();
@@ -200,13 +199,13 @@ public class DDOImpl {
 					
 				});
 				
-				Future<String> lvlResponse = exec.submit(new Callable<String>() {
+				Future<String> ddoResponse = exec.submit(new Callable<String>() {
 
 					@Override
 					public String call() throws Exception {
 						DatagramSocket ds = new DatagramSocket();
 						InetAddress aHost = InetAddress.getByName("localhost");
-						DatagramPacket request = new DatagramPacket(message, message.length, aHost, LVLPort);
+						DatagramPacket request = new DatagramPacket(message, message.length, aHost, DDOPort);
 						ds.send(request);
 						DatagramPacket reply2 = new DatagramPacket(buffer2, buffer2.length);
 						ds.receive(reply2);
@@ -218,7 +217,7 @@ public class DDOImpl {
 					}
 				});
 				
-				s = s + mtlResponse.get() + lvlResponse.get();
+				s = s + mtlResponse.get() + ddoResponse.get();
 			}catch(Exception e){
 				e.printStackTrace();
 			}
@@ -288,12 +287,10 @@ public class DDOImpl {
 
 		public static void main(String[] args) throws Exception {
 			// TODO Auto-generated method stub
-			System.out.println("DDO server started");
 			DatagramSocket ddo = null;
 			try{
-				//DDOImpl dds=new DDOImpl();
 				
-				ddo = new DatagramSocket(DDOPort);
+				ddo = new DatagramSocket(LVLPort);
 				while(true){
 					String bloop = "";
 					byte[] buffer = new byte[1000];
@@ -301,11 +298,11 @@ public class DDOImpl {
 					ddo.receive(request);
 					
 					if(data(buffer).toString().equals("getRecordCounts"))
-						bloop = "DDO "+ String.valueOf(database.size()) + ", "; 
+						bloop = "LVL "+ String.valueOf(database.size()) + ", "; 
 					
 					else if(data(buffer).toString().contains("transferRecord"))
 					{
-						DDOImpl obj = new DDOImpl();
+						LVLImpl obj = new LVLImpl();
 						String bleep = data(buffer).toString();
 						String parts[] = bleep.split("::");
 						if(parts[2].startsWith("TR"))

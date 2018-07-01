@@ -16,7 +16,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.jws.WebParam;
 import javax.jws.WebService;
 
 
@@ -24,21 +23,21 @@ import javax.jws.WebService;
 
 @WebService(endpointInterface="com.DCMSInterface")
 
-public class DDOImpl {
+public class MTLImpl {
 
 	private static int ID = 10000;
 	private LogManager logger = null;
 	public static Map<String,List<Record>> database=new HashMap<String,List<Record>>();
 	List<Record> records;
 	Record recobj;
-	private int MTLPort = 1412;
+	private static int MTLPort = 1412;
     private int LVLPort = 7875;
-    private static int DDOPort = 7825;
+    private int DDOPort = 7825;
     ExecutorService exec = Executors.newFixedThreadPool(10);
-	 public DDOImpl() throws IOException 
+	 public MTLImpl() throws IOException 
 	    {
 	    	super();
-			logger = new LogManager("ddo-server.log");
+			logger = new LogManager("mtl-server.log");
 		}
 
 	    public synchronized int genID()
@@ -56,15 +55,15 @@ public class DDOImpl {
 				recobj=new TeacherRecord(firstName, lastName, address, phone, specialization, location, id);
 				
 				synchronized(this) {
-					if(DDOImpl.database.containsKey(key)){
-						records=DDOImpl.database.get(key);
+					if(MTLImpl.database.containsKey(key)){
+						records=MTLImpl.database.get(key);
 						records.add(recobj);
-						DDOImpl.database.put(key, records);
+						MTLImpl.database.put(key, records);
 					}
 					else{
 						records=new ArrayList<Record>();
 						records.add(recobj);
-						DDOImpl.database.put(key, records);
+						MTLImpl.database.put(key, records);
 					}
 					logger.writeLog("Inserted Teacher Record Number : "+ ((TeacherRecord)recobj).Record_ID);
 				}
@@ -173,19 +172,19 @@ public class DDOImpl {
 		
 		public String getRecordCounts(String ManagerID)
 		{
-			String s="DDO "+DDOImpl.database.size()+" ";
+			String s="MTL "+MTLImpl.database.size()+" ";
 			
 			try {
 				byte[] message = "getRecordCounts".getBytes();
 				byte[] buffer1 = new byte[1000];
 				byte[] buffer2 = new byte[1000];
 				
-				Future<String> mtlResponse = exec.submit(new Callable<String>() {
+				Future<String> ddoResponse = exec.submit(new Callable<String>() {
 
 					public String call() throws Exception {
 						DatagramSocket ds = new DatagramSocket();
 						InetAddress aHost = InetAddress.getByName("localhost");
-						DatagramPacket request = new DatagramPacket(message, message.length, aHost, MTLPort);
+						DatagramPacket request = new DatagramPacket(message, message.length, aHost, DDOPort);
 						ds.send(request);
 						System.out.println("Request sent : "+request);
 						DatagramPacket reply1 = new DatagramPacket(buffer1, buffer1.length);
@@ -218,7 +217,7 @@ public class DDOImpl {
 					}
 				});
 				
-				s = s + mtlResponse.get() + lvlResponse.get();
+				s = s + ddoResponse.get() + lvlResponse.get();
 			}catch(Exception e){
 				e.printStackTrace();
 			}
@@ -288,12 +287,10 @@ public class DDOImpl {
 
 		public static void main(String[] args) throws Exception {
 			// TODO Auto-generated method stub
-			System.out.println("DDO server started");
 			DatagramSocket ddo = null;
 			try{
-				//DDOImpl dds=new DDOImpl();
 				
-				ddo = new DatagramSocket(DDOPort);
+				ddo = new DatagramSocket(MTLPort);
 				while(true){
 					String bloop = "";
 					byte[] buffer = new byte[1000];
@@ -301,11 +298,11 @@ public class DDOImpl {
 					ddo.receive(request);
 					
 					if(data(buffer).toString().equals("getRecordCounts"))
-						bloop = "DDO "+ String.valueOf(database.size()) + ", "; 
+						bloop = "MTL "+ String.valueOf(database.size()) + ", "; 
 					
 					else if(data(buffer).toString().contains("transferRecord"))
 					{
-						DDOImpl obj = new DDOImpl();
+						MTLImpl obj = new MTLImpl();
 						String bleep = data(buffer).toString();
 						String parts[] = bleep.split("::");
 						if(parts[2].startsWith("TR"))

@@ -2,8 +2,7 @@ package test;
 
 import java.util.Scanner;
 
-import com.DCMSInterface;
-
+import client.DCMSInterface;
 import client.DDOImplService;
 
 public class StartClient {

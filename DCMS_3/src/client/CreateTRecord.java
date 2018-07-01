@@ -3,6 +3,7 @@ package client;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 
@@ -16,13 +17,13 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="arg0" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="arg1" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="arg2" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="arg3" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="arg4" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="arg5" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="arg6" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="ManagerID" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="FirstName" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="LastName" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="Address" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="Phone" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="Specialization" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="Location" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -33,190 +34,197 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "createTRecord", propOrder = {
-    "arg0",
-    "arg1",
-    "arg2",
-    "arg3",
-    "arg4",
-    "arg5",
-    "arg6"
+    "managerID",
+    "firstName",
+    "lastName",
+    "address",
+    "phone",
+    "specialization",
+    "location"
 })
 public class CreateTRecord {
 
-    protected String arg0;
-    protected String arg1;
-    protected String arg2;
-    protected String arg3;
-    protected String arg4;
-    protected String arg5;
-    protected String arg6;
+    @XmlElement(name = "ManagerID")
+    protected String managerID;
+    @XmlElement(name = "FirstName")
+    protected String firstName;
+    @XmlElement(name = "LastName")
+    protected String lastName;
+    @XmlElement(name = "Address")
+    protected String address;
+    @XmlElement(name = "Phone")
+    protected String phone;
+    @XmlElement(name = "Specialization")
+    protected String specialization;
+    @XmlElement(name = "Location")
+    protected String location;
 
     /**
-     * Gets the value of the arg0 property.
+     * Gets the value of the managerID property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getArg0() {
-        return arg0;
+    public String getManagerID() {
+        return managerID;
     }
 
     /**
-     * Sets the value of the arg0 property.
+     * Sets the value of the managerID property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setArg0(String value) {
-        this.arg0 = value;
+    public void setManagerID(String value) {
+        this.managerID = value;
     }
 
     /**
-     * Gets the value of the arg1 property.
+     * Gets the value of the firstName property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getArg1() {
-        return arg1;
+    public String getFirstName() {
+        return firstName;
     }
 
     /**
-     * Sets the value of the arg1 property.
+     * Sets the value of the firstName property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setArg1(String value) {
-        this.arg1 = value;
+    public void setFirstName(String value) {
+        this.firstName = value;
     }
 
     /**
-     * Gets the value of the arg2 property.
+     * Gets the value of the lastName property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getArg2() {
-        return arg2;
+    public String getLastName() {
+        return lastName;
     }
 
     /**
-     * Sets the value of the arg2 property.
+     * Sets the value of the lastName property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setArg2(String value) {
-        this.arg2 = value;
+    public void setLastName(String value) {
+        this.lastName = value;
     }
 
     /**
-     * Gets the value of the arg3 property.
+     * Gets the value of the address property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getArg3() {
-        return arg3;
+    public String getAddress() {
+        return address;
     }
 
     /**
-     * Sets the value of the arg3 property.
+     * Sets the value of the address property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setArg3(String value) {
-        this.arg3 = value;
+    public void setAddress(String value) {
+        this.address = value;
     }
 
     /**
-     * Gets the value of the arg4 property.
+     * Gets the value of the phone property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getArg4() {
-        return arg4;
+    public String getPhone() {
+        return phone;
     }
 
     /**
-     * Sets the value of the arg4 property.
+     * Sets the value of the phone property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setArg4(String value) {
-        this.arg4 = value;
+    public void setPhone(String value) {
+        this.phone = value;
     }
 
     /**
-     * Gets the value of the arg5 property.
+     * Gets the value of the specialization property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getArg5() {
-        return arg5;
+    public String getSpecialization() {
+        return specialization;
     }
 
     /**
-     * Sets the value of the arg5 property.
+     * Sets the value of the specialization property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setArg5(String value) {
-        this.arg5 = value;
+    public void setSpecialization(String value) {
+        this.specialization = value;
     }
 
     /**
-     * Gets the value of the arg6 property.
+     * Gets the value of the location property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getArg6() {
-        return arg6;
+    public String getLocation() {
+        return location;
     }
 
     /**
-     * Sets the value of the arg6 property.
+     * Sets the value of the location property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setArg6(String value) {
-        this.arg6 = value;
+    public void setLocation(String value) {
+        this.location = value;
     }
 
 }

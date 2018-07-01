@@ -26,12 +26,12 @@ public interface DCMSInterface {
 
     /**
      * 
-     * @param arg3
-     * @param arg2
-     * @param arg5
-     * @param arg4
-     * @param arg1
-     * @param arg0
+     * @param statusDate
+     * @param firstName
+     * @param lastName
+     * @param managerID
+     * @param coursesRegistered
+     * @param status
      * @return
      *     returns java.lang.String
      */
@@ -41,28 +41,28 @@ public interface DCMSInterface {
     @ResponseWrapper(localName = "createSRecordResponse", targetNamespace = "http://com/", className = "client.CreateSRecordResponse")
     @Action(input = "http://com/DCMSInterface/createSRecordRequest", output = "http://com/DCMSInterface/createSRecordResponse")
     public String createSRecord(
-        @WebParam(name = "arg0", targetNamespace = "")
-        String arg0,
-        @WebParam(name = "arg1", targetNamespace = "")
-        String arg1,
-        @WebParam(name = "arg2", targetNamespace = "")
-        String arg2,
-        @WebParam(name = "arg3", targetNamespace = "")
-        String arg3,
-        @WebParam(name = "arg4", targetNamespace = "")
-        String arg4,
-        @WebParam(name = "arg5", targetNamespace = "")
-        String arg5);
+        @WebParam(name = "ManagerID", targetNamespace = "")
+        String managerID,
+        @WebParam(name = "FirstName", targetNamespace = "")
+        String firstName,
+        @WebParam(name = "LastName", targetNamespace = "")
+        String lastName,
+        @WebParam(name = "CoursesRegistered", targetNamespace = "")
+        String coursesRegistered,
+        @WebParam(name = "Status", targetNamespace = "")
+        String status,
+        @WebParam(name = "StatusDate", targetNamespace = "")
+        String statusDate);
 
     /**
      * 
-     * @param arg3
-     * @param arg2
-     * @param arg5
-     * @param arg4
-     * @param arg1
-     * @param arg0
-     * @param arg6
+     * @param firstName
+     * @param lastName
+     * @param address
+     * @param phone
+     * @param specialization
+     * @param location
+     * @param managerID
      * @return
      *     returns java.lang.String
      */
@@ -72,19 +72,79 @@ public interface DCMSInterface {
     @ResponseWrapper(localName = "createTRecordResponse", targetNamespace = "http://com/", className = "client.CreateTRecordResponse")
     @Action(input = "http://com/DCMSInterface/createTRecordRequest", output = "http://com/DCMSInterface/createTRecordResponse")
     public String createTRecord(
-        @WebParam(name = "arg0", targetNamespace = "")
-        String arg0,
-        @WebParam(name = "arg1", targetNamespace = "")
-        String arg1,
-        @WebParam(name = "arg2", targetNamespace = "")
-        String arg2,
-        @WebParam(name = "arg3", targetNamespace = "")
-        String arg3,
-        @WebParam(name = "arg4", targetNamespace = "")
-        String arg4,
-        @WebParam(name = "arg5", targetNamespace = "")
-        String arg5,
-        @WebParam(name = "arg6", targetNamespace = "")
-        String arg6);
+        @WebParam(name = "ManagerID", targetNamespace = "")
+        String managerID,
+        @WebParam(name = "FirstName", targetNamespace = "")
+        String firstName,
+        @WebParam(name = "LastName", targetNamespace = "")
+        String lastName,
+        @WebParam(name = "Address", targetNamespace = "")
+        String address,
+        @WebParam(name = "Phone", targetNamespace = "")
+        String phone,
+        @WebParam(name = "Specialization", targetNamespace = "")
+        String specialization,
+        @WebParam(name = "Location", targetNamespace = "")
+        String location);
+
+    /**
+     * 
+     * @param recordID
+     * @param newServerName
+     * @param managerID
+     * @return
+     *     returns java.lang.String
+     */
+    @WebMethod
+    @WebResult(targetNamespace = "")
+    @RequestWrapper(localName = "transferRecord", targetNamespace = "http://com/", className = "client.TransferRecord")
+    @ResponseWrapper(localName = "transferRecordResponse", targetNamespace = "http://com/", className = "client.TransferRecordResponse")
+    @Action(input = "http://com/DCMSInterface/transferRecordRequest", output = "http://com/DCMSInterface/transferRecordResponse")
+    public String transferRecord(
+        @WebParam(name = "ManagerID", targetNamespace = "")
+        String managerID,
+        @WebParam(name = "RecordID", targetNamespace = "")
+        String recordID,
+        @WebParam(name = "NewServerName", targetNamespace = "")
+        String newServerName);
+
+    /**
+     * 
+     * @param managerID
+     * @return
+     *     returns java.lang.String
+     */
+    @WebMethod
+    @WebResult(targetNamespace = "")
+    @RequestWrapper(localName = "getRecordCounts", targetNamespace = "http://com/", className = "client.GetRecordCounts")
+    @ResponseWrapper(localName = "getRecordCountsResponse", targetNamespace = "http://com/", className = "client.GetRecordCountsResponse")
+    @Action(input = "http://com/DCMSInterface/getRecordCountsRequest", output = "http://com/DCMSInterface/getRecordCountsResponse")
+    public String getRecordCounts(
+        @WebParam(name = "ManagerID", targetNamespace = "")
+        String managerID);
+
+    /**
+     * 
+     * @param recordID
+     * @param newValue
+     * @param fieldName
+     * @param managerID
+     * @return
+     *     returns java.lang.String
+     */
+    @WebMethod
+    @WebResult(targetNamespace = "")
+    @RequestWrapper(localName = "editRecord", targetNamespace = "http://com/", className = "client.EditRecord")
+    @ResponseWrapper(localName = "editRecordResponse", targetNamespace = "http://com/", className = "client.EditRecordResponse")
+    @Action(input = "http://com/DCMSInterface/editRecordRequest", output = "http://com/DCMSInterface/editRecordResponse")
+    public String editRecord(
+        @WebParam(name = "ManagerID", targetNamespace = "")
+        String managerID,
+        @WebParam(name = "RecordID", targetNamespace = "")
+        String recordID,
+        @WebParam(name = "FieldName", targetNamespace = "")
+        String fieldName,
+        @WebParam(name = "NewValue", targetNamespace = "")
+        String newValue);
 
 }
