@@ -18,11 +18,11 @@
   <message name="getRecordCountsResponse">
     <part name="parameters" element="tns:getRecordCountsResponse"/>
   </message>
-  <message name="editRecord">
-    <part name="parameters" element="tns:editRecord"/>
+  <message name="createSRecord">
+    <part name="parameters" element="tns:createSRecord"/>
   </message>
-  <message name="editRecordResponse">
-    <part name="parameters" element="tns:editRecordResponse"/>
+  <message name="createSRecordResponse">
+    <part name="parameters" element="tns:createSRecordResponse"/>
   </message>
   <message name="createTRecord">
     <part name="parameters" element="tns:createTRecord"/>
@@ -30,11 +30,11 @@
   <message name="createTRecordResponse">
     <part name="parameters" element="tns:createTRecordResponse"/>
   </message>
-  <message name="createSRecord">
-    <part name="parameters" element="tns:createSRecord"/>
+  <message name="editRecord">
+    <part name="parameters" element="tns:editRecord"/>
   </message>
-  <message name="createSRecordResponse">
-    <part name="parameters" element="tns:createSRecordResponse"/>
+  <message name="editRecordResponse">
+    <part name="parameters" element="tns:editRecordResponse"/>
   </message>
   <portType name="DCMSInterface">
     <operation name="transferRecord">
@@ -45,17 +45,17 @@
       <input wsam:Action="http://com/DCMSInterface/getRecordCountsRequest" message="tns:getRecordCounts"/>
       <output wsam:Action="http://com/DCMSInterface/getRecordCountsResponse" message="tns:getRecordCountsResponse"/>
     </operation>
-    <operation name="editRecord">
-      <input wsam:Action="http://com/DCMSInterface/editRecordRequest" message="tns:editRecord"/>
-      <output wsam:Action="http://com/DCMSInterface/editRecordResponse" message="tns:editRecordResponse"/>
+    <operation name="createSRecord">
+      <input wsam:Action="http://com/DCMSInterface/createSRecordRequest" message="tns:createSRecord"/>
+      <output wsam:Action="http://com/DCMSInterface/createSRecordResponse" message="tns:createSRecordResponse"/>
     </operation>
     <operation name="createTRecord">
       <input wsam:Action="http://com/DCMSInterface/createTRecordRequest" message="tns:createTRecord"/>
       <output wsam:Action="http://com/DCMSInterface/createTRecordResponse" message="tns:createTRecordResponse"/>
     </operation>
-    <operation name="createSRecord">
-      <input wsam:Action="http://com/DCMSInterface/createSRecordRequest" message="tns:createSRecord"/>
-      <output wsam:Action="http://com/DCMSInterface/createSRecordResponse" message="tns:createSRecordResponse"/>
+    <operation name="editRecord">
+      <input wsam:Action="http://com/DCMSInterface/editRecordRequest" message="tns:editRecord"/>
+      <output wsam:Action="http://com/DCMSInterface/editRecordResponse" message="tns:editRecordResponse"/>
     </operation>
   </portType>
   <binding name="DDOImplPortBinding" type="tns:DCMSInterface">
@@ -78,7 +78,7 @@
         <soap:body use="literal"/>
       </output>
     </operation>
-    <operation name="editRecord">
+    <operation name="createSRecord">
       <soap:operation soapAction=""/>
       <input>
         <soap:body use="literal"/>
@@ -96,7 +96,7 @@
         <soap:body use="literal"/>
       </output>
     </operation>
-    <operation name="createSRecord">
+    <operation name="editRecord">
       <soap:operation soapAction=""/>
       <input>
         <soap:body use="literal"/>

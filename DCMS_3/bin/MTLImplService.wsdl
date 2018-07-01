@@ -12,17 +12,17 @@
   <message name="createTRecordResponse">
     <part name="parameters" element="tns:createTRecordResponse"/>
   </message>
-  <message name="editRecord">
-    <part name="parameters" element="tns:editRecord"/>
-  </message>
-  <message name="editRecordResponse">
-    <part name="parameters" element="tns:editRecordResponse"/>
-  </message>
   <message name="createSRecord">
     <part name="parameters" element="tns:createSRecord"/>
   </message>
   <message name="createSRecordResponse">
     <part name="parameters" element="tns:createSRecordResponse"/>
+  </message>
+  <message name="editRecord">
+    <part name="parameters" element="tns:editRecord"/>
+  </message>
+  <message name="editRecordResponse">
+    <part name="parameters" element="tns:editRecordResponse"/>
   </message>
   <message name="transferRecord">
     <part name="parameters" element="tns:transferRecord"/>
@@ -41,13 +41,13 @@
       <input wsam:Action="http://com/DCMSInterface/createTRecordRequest" message="tns:createTRecord"/>
       <output wsam:Action="http://com/DCMSInterface/createTRecordResponse" message="tns:createTRecordResponse"/>
     </operation>
-    <operation name="editRecord">
-      <input wsam:Action="http://com/DCMSInterface/editRecordRequest" message="tns:editRecord"/>
-      <output wsam:Action="http://com/DCMSInterface/editRecordResponse" message="tns:editRecordResponse"/>
-    </operation>
     <operation name="createSRecord">
       <input wsam:Action="http://com/DCMSInterface/createSRecordRequest" message="tns:createSRecord"/>
       <output wsam:Action="http://com/DCMSInterface/createSRecordResponse" message="tns:createSRecordResponse"/>
+    </operation>
+    <operation name="editRecord">
+      <input wsam:Action="http://com/DCMSInterface/editRecordRequest" message="tns:editRecord"/>
+      <output wsam:Action="http://com/DCMSInterface/editRecordResponse" message="tns:editRecordResponse"/>
     </operation>
     <operation name="transferRecord">
       <input wsam:Action="http://com/DCMSInterface/transferRecordRequest" message="tns:transferRecord"/>
@@ -69,7 +69,7 @@
         <soap:body use="literal"/>
       </output>
     </operation>
-    <operation name="editRecord">
+    <operation name="createSRecord">
       <soap:operation soapAction=""/>
       <input>
         <soap:body use="literal"/>
@@ -78,7 +78,7 @@
         <soap:body use="literal"/>
       </output>
     </operation>
-    <operation name="createSRecord">
+    <operation name="editRecord">
       <soap:operation soapAction=""/>
       <input>
         <soap:body use="literal"/>

@@ -73,7 +73,7 @@ public class DDOImpl {
 				logger.writeLog("Error occured while trying to insert teacher record number : "+((TeacherRecord)recobj).Record_ID);
 				return "Failed";
 			}
-			return id;
+			return "Success";
 		}
 
 		public String createSRecord(String ManagerID, String firstName, String lastName, String courseRegistered,
@@ -187,11 +187,11 @@ public class DDOImpl {
 						InetAddress aHost = InetAddress.getByName("localhost");
 						DatagramPacket request = new DatagramPacket(message, message.length, aHost, MTLPort);
 						ds.send(request);
-						System.out.println("Request sent : "+request);
+//						System.out.println("Request sent : "+request);
 						DatagramPacket reply1 = new DatagramPacket(buffer1, buffer1.length);
 						ds.receive(reply1);
 						String response1 = new String(reply1.getData());
-						System.out.println("Response received: "+response1);
+//						System.out.println("Response received: "+response1);
 						String a = response1.trim();
 						ds.close();
 						return a;
@@ -211,7 +211,7 @@ public class DDOImpl {
 						DatagramPacket reply2 = new DatagramPacket(buffer2, buffer2.length);
 						ds.receive(reply2);
 						String response2= new String(reply2.getData());
-						System.out.println("Response received: "+response2);
+//						System.out.println("Response received: "+response2);
 						ds.close();
 						String b = response2.trim();
 						return b;
@@ -240,7 +240,7 @@ public class DDOImpl {
 			fullRecord = fetchRecord(recordID);
 			String msg = "transferRecord::" + managerID + "::" + fullRecord;
 			
-			System.out.println(msg);
+//			System.out.println(msg);
 			if(remoteServerName.equalsIgnoreCase("MTL"))
 				port = MTLPort;
 			else
@@ -288,10 +288,9 @@ public class DDOImpl {
 
 		public static void main(String[] args) throws Exception {
 			// TODO Auto-generated method stub
-			System.out.println("DDO server started");
+//			System.out.println("DDO server started");
 			DatagramSocket ddo = null;
 			try{
-				//DDOImpl dds=new DDOImpl();
 				
 				ddo = new DatagramSocket(DDOPort);
 				while(true){

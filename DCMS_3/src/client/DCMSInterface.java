@@ -26,36 +26,6 @@ public interface DCMSInterface {
 
     /**
      * 
-     * @param statusDate
-     * @param firstName
-     * @param lastName
-     * @param managerID
-     * @param coursesRegistered
-     * @param status
-     * @return
-     *     returns java.lang.String
-     */
-    @WebMethod
-    @WebResult(targetNamespace = "")
-    @RequestWrapper(localName = "createSRecord", targetNamespace = "http://com/", className = "client.CreateSRecord")
-    @ResponseWrapper(localName = "createSRecordResponse", targetNamespace = "http://com/", className = "client.CreateSRecordResponse")
-    @Action(input = "http://com/DCMSInterface/createSRecordRequest", output = "http://com/DCMSInterface/createSRecordResponse")
-    public String createSRecord(
-        @WebParam(name = "ManagerID", targetNamespace = "")
-        String managerID,
-        @WebParam(name = "FirstName", targetNamespace = "")
-        String firstName,
-        @WebParam(name = "LastName", targetNamespace = "")
-        String lastName,
-        @WebParam(name = "CoursesRegistered", targetNamespace = "")
-        String coursesRegistered,
-        @WebParam(name = "Status", targetNamespace = "")
-        String status,
-        @WebParam(name = "StatusDate", targetNamespace = "")
-        String statusDate);
-
-    /**
-     * 
      * @param firstName
      * @param lastName
      * @param address
@@ -122,6 +92,36 @@ public interface DCMSInterface {
     public String getRecordCounts(
         @WebParam(name = "ManagerID", targetNamespace = "")
         String managerID);
+
+    /**
+     * 
+     * @param statusDate
+     * @param firstName
+     * @param lastName
+     * @param managerID
+     * @param coursesRegistered
+     * @param status
+     * @return
+     *     returns java.lang.String
+     */
+    @WebMethod
+    @WebResult(targetNamespace = "")
+    @RequestWrapper(localName = "createSRecord", targetNamespace = "http://com/", className = "client.CreateSRecord")
+    @ResponseWrapper(localName = "createSRecordResponse", targetNamespace = "http://com/", className = "client.CreateSRecordResponse")
+    @Action(input = "http://com/DCMSInterface/createSRecordRequest", output = "http://com/DCMSInterface/createSRecordResponse")
+    public String createSRecord(
+        @WebParam(name = "ManagerID", targetNamespace = "")
+        String managerID,
+        @WebParam(name = "FirstName", targetNamespace = "")
+        String firstName,
+        @WebParam(name = "LastName", targetNamespace = "")
+        String lastName,
+        @WebParam(name = "CoursesRegistered", targetNamespace = "")
+        String coursesRegistered,
+        @WebParam(name = "Status", targetNamespace = "")
+        String status,
+        @WebParam(name = "StatusDate", targetNamespace = "")
+        String statusDate);
 
     /**
      * 

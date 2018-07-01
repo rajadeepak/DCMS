@@ -1,200 +1,193 @@
 package test;
 
+import java.io.IOException;
 import java.util.Scanner;
+import javax.xml.ws.WebServiceRef;
+
+import com.LogManager;
 
 import client.DCMSInterface;
 import client.DDOImplService;
+import client.LVLImplService;
+import client.MTLImplService;
 
 public class StartClient {
-
-
-	    public static String managerID;
-	    static String First_name;
-
-		 static String Last_name;
-
-		 static String Address;
-
-		 static String Phone;
-
-		 static String Specialization;
-
-		 static String Location;
-
-		 static  String CoursesRegistered;
-
-		 static String Status;
-
-		 static String date;
-		 
-		 static String RecordID;
-		 
-		 static String fieldName;
-		 static String newValue;
-	   
-	    /*public static MTLServer mtl_server = null;
-	    public static LVLServer lvl_server = null;
-	    public static DDOServer ddo_server = null;*/
-	    public static String recordID;
-	    public static String serverLocation;
-	    public static int managerIDbase =1000;
+	@WebServiceRef(wsdlLocation="http://localhost:7777/ddo, http://localhost:7777/lvl, http://localhost:7777/mtl")
+	
+	public static String managerID;
+	public static String First_name;
+	public static String Last_name;
+	public static String Address;
+	public static String Phone;
+	public static String Specialization;
+	public static String Location;
+	public static String CoursesRegistered;
+	public static String Status;
+	public static String date;
+	public static String RecordID;
+	public static String fieldName;
+	public static String newValue;
+	public static String recordID;
+	public static String serverLocation;
+	public static int managerIDbase =1000;
+	private static LogManager logger = null;
+	public static Scanner sc;
+	public static DCMSInterface service = null;
+	
+	public StartClient() throws IOException{
+		
+		 super();
+		 logger = new LogManager("Client-log.log");
+	}
 	
 	
-	public static void main(String[] args)
-	
-	{
-		  DDOImplService serviecDDO = new DDOImplService();
-		  DCMSInterface dcms = serviecDDO.getDDOImplPort();
-		  dcms.createTRecord("123", "456", "459", "456", "arg4", "arg5", "arg6");
-		    
-//		   System.out.println("Enter manager ID : ");
-//		    Scanner sc = new Scanner(System.in);
-//		    managerID = sc.next();
-//		    serverLocation = managerID.substring(0, 3).toUpperCase();
-//		    
-//		    
-//		  
-//		    
-//		    while(true)  {
-//
-//			System.out.println("Select from following operations:");
-//
-//			System.out.println("1.create teacher record:");
-//
-//			System.out.println("2.create student record:");
-//
-//			System.out.println("3.Get record counts:");
-//
-//			System.out.println("4.Edit Record:");
-//
-//			System.out.println("5.Exit as the current manager:");
-//			
-//			System.out.println("6.logout:");
-//			
-//			int user_choice=sc.nextInt();
-//
-//			if(user_choice==1){
-//				
-//				get_inpput();
-//				//System.out.println(managerID+" "+ First_name+" "+ Last_name+" "+Address+" "+ Phone+" "+Specialization+" "+Location);
-//				dcms.createTRecord(managerID, First_name, Last_name, Address, Phone, Specialization, Location);
-//			}
-//			
-//			else if(user_choice==2){
-//
-//				get_studentinput();
-//
-//				dcms.createSRecord(managerID,First_name, Last_name, CoursesRegistered, Status, date);
-//
-//			}
-
-//			else if(user_choice==3){
-//
-//				System.out.println(dcms.getRecordCounts(managerID));
-//
-//			}
-//			else if(user_choice==4){
-//				
-//				 get_editinp();
-//				System.out.print(dcms.editRecord(managerID,RecordID, fieldName, newValue));
-//			}
+	public static void main(String[] args) throws IOException{
+		
+		StartClient orike = new StartClient();
+		sc = new Scanner(System.in);
+		serverLocation = getManagerInput();
+		
+		if(serverLocation.equalsIgnoreCase("DDO")){
 			
+			DDOImplService ddo = new DDOImplService();
+			service = ddo.getDDOImplPort();
+		}
+		else if(serverLocation.equalsIgnoreCase("LVL")){
+			
+			LVLImplService lvl = new LVLImplService();
+			service = lvl.getLVLImplPort();
+		}
+		else if(serverLocation.equalsIgnoreCase("MTL")){
+			
+			MTLImplService mtl = new MTLImplService();
+			service = mtl.getMTLImplPort();
+		}
 
+		String status = "";
+		while(true)  {
+			System.out.println("Select from following operations:");
+			System.out.println("1.create teacher record:");
+			System.out.println("2.create student record:");
+			System.out.println("3.Get record counts:");
+			System.out.println("4.Edit Record:");
+			System.out.println("5.Transfer Record:");
+			System.out.println("6.Logout as the current manager:");
+			System.out.println("7.Exit");
 		
-		    
+			int user_choice=sc.nextInt();
+			switch(user_choice)
+			{
+			case 1:
+				getTeacherInput();
+				status = service.createTRecord(managerID, First_name, Last_name, Address, Phone, Specialization, Location);
+				System.out.println(status);
+				if(status.equalsIgnoreCase("success"))
+					logger.writeLog("Operation createTRecord Success. Manager ID: "+managerID);
+				else
+					logger.writeLog("Operation createTRecord Failed. Manager ID: "+managerID);
+				break;
+			case 2:
+				getStudentInput();
+				status = service.createSRecord(managerID,First_name, Last_name, CoursesRegistered, Status, date);
+				if(status.equalsIgnoreCase("success"))
+					logger.writeLog("Operation createSRecord Success. Manager ID: "+managerID);
+				else
+					logger.writeLog("Operation createSRecord Failed. Manager ID: "+managerID);
+				break;
+			case 3:
+				System.out.println(service.getRecordCounts(managerID));
+				logger.writeLog("Operation getRecordCounts Success. Manager ID: "+managerID);
+				break;
+			case 4:
+				getEditRecordInput();
+				status = service.editRecord(managerID,RecordID, fieldName, newValue);
+				if(status.equalsIgnoreCase("success"))
+					logger.writeLog("Operation editRecord Success. Manager ID: "+managerID);
+				else
+					logger.writeLog("Operation editRecord Failed. Manager ID: "+managerID);
+				break;
+			case 5:
+				getTransferInput();
+				status = service.transferRecord(managerID, RecordID, serverLocation);
+				if(status.equalsIgnoreCase("success"))
+					logger.writeLog("Operation transferRecord Success. Manager ID: "+managerID);
+				else
+					logger.writeLog("Operation transferRecord Failed. Manager ID: "+managerID);
+				break;
+			case 6:
+				System.out.println("Manager logged Out. Please login again");
+				serverLocation = getManagerInput();
+				break;
+			case 7:
+				System.out.println("Thank you. Exiting!");
+				return;
+			default:
+				System.out.println("Invalid Option. Please select again");
+				break;
+			}
+		}
+	
+	}
+	
+	public static String getManagerInput() {
 		
-//	}
-	
-}
-
-
-
-private static void get_inpput() {
-		// TODO Auto-generated method stub
-		
-	     
-Scanner s=new Scanner(System.in);
-
-	
-
-	System.out.println("Enter First Name");
-
-	First_name=s.nextLine();
-
-	System.out.println("Enter Last Name");
-
-	Last_name=s.nextLine();
-
-	System.out.println("Enter Address");
-	Address=s.nextLine();
-	
-	System.out.println("Enter specilization");
-	
-	Specialization=s.nextLine();
-	
-	System.out.println("Enter phone");
-	
-	Phone=s.nextLine();
-	
-	System.out.println("Ener Location");
-	
-	Location = s.nextLine();
-	
-	
+		sc = new Scanner(System.in);
+		System.out.println("Enter manager ID : ");
+	    managerID = sc.next();
+	    serverLocation = managerID.substring(0, 3).toUpperCase();
+	    return serverLocation;
 	}
 
 
-private static void get_editinp() {
-	// TODO Auto-generated method stub
-      Scanner s=new Scanner(System.in);
+	private static void getTransferInput() {
+		
+		sc = new Scanner(System.in);
+		System.out.println("Enter recordID");
+		RecordID= sc.nextLine();
+		System.out.println("which server you want to transfer?");
+		serverLocation=sc.nextLine();
+	}
 
-	System.out.println("Enter record id");
-	RecordID=s.nextLine();
-	System.out.println("Enter field name ");
-	fieldName=s.nextLine();
-	System.out.println("Enter new value that you want to update");
-	newValue=s.nextLine();
-}
+	private static void getTeacherInput() {
+		
+		sc = new Scanner(System.in);
+		System.out.println("Enter First Name");
+		First_name=sc.nextLine();
+		System.out.println("Enter Last Name");
+		Last_name=sc.nextLine();
+		System.out.println("Enter Address");
+		Address=sc.nextLine();
+		System.out.println("Enter specilization");
+		Specialization=sc.nextLine();
+		System.out.println("Enter phone");
+		Phone=sc.nextLine();
+		System.out.println("Ener Location");
+		Location = sc.nextLine();
+	}
 
+	private static void getEditRecordInput() {
 
-private static  void get_studentinput() {
+		sc=new Scanner(System.in);
+		System.out.println("Enter record id");
+		RecordID=sc.nextLine();
+		System.out.println("Enter field name ");
+		fieldName=sc.nextLine();
+		System.out.println("Enter new value that you want to update");
+		newValue=sc.nextLine();
+	}
 
-	// TODO Auto-generated method stub
-
-	
-
-	Scanner s=new Scanner(System.in);
-
-	
-
-	System.out.println("Enter First Name");
-
-	First_name=s.nextLine();
-
-
-
-
-	System.out.println("Enter Last Name");
-
-	Last_name=s.nextLine();
-
-	
-
-	System.out.println("Enter courses registered");
-
-	CoursesRegistered=s.nextLine();
-
-	
-
-	System.out.println("Enter status");
-
-	Status=s.nextLine();
-
-	
-
-	System.out.println("Enter Date");
-
-	date=s.nextLine();
-
-}
+	private static  void getStudentInput() {
+		
+		sc = new Scanner(System.in);
+		System.out.println("Enter First Name");
+		First_name=sc.nextLine();
+		System.out.println("Enter Last Name");
+		Last_name=sc.nextLine();
+		System.out.println("Enter courses registered");
+		CoursesRegistered=sc.nextLine();
+		System.out.println("Enter status");
+		Status=sc.nextLine();
+		System.out.println("Enter Date");
+		date=sc.nextLine();
+	}
 }

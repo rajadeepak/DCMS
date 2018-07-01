@@ -173,7 +173,6 @@ public class MTLImpl {
 		public String getRecordCounts(String ManagerID)
 		{
 			String s="MTL "+MTLImpl.database.size()+" ";
-			
 			try {
 				byte[] message = "getRecordCounts".getBytes();
 				byte[] buffer1 = new byte[1000];
@@ -240,8 +239,8 @@ public class MTLImpl {
 			String msg = "transferRecord::" + managerID + "::" + fullRecord;
 			
 			System.out.println(msg);
-			if(remoteServerName.equalsIgnoreCase("MTL"))
-				port = MTLPort;
+			if(remoteServerName.equalsIgnoreCase("DDO"))
+				port = DDOPort;
 			else
 				port = LVLPort;
 			
@@ -330,8 +329,6 @@ public class MTLImpl {
 		
 		private static StringBuilder data(byte[] a) {
 			// TODO Auto-generated method stub
-			
-			
 			if(a==null)
 			return null;
 			StringBuilder ret=new StringBuilder();

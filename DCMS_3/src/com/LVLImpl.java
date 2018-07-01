@@ -243,7 +243,7 @@ public class LVLImpl {
 			if(remoteServerName.equalsIgnoreCase("MTL"))
 				port = MTLPort;
 			else
-				port = LVLPort;
+				port = DDOPort;
 			
 			DatagramSocket ds = null;
 
@@ -289,7 +289,6 @@ public class LVLImpl {
 			// TODO Auto-generated method stub
 			DatagramSocket ddo = null;
 			try{
-				
 				ddo = new DatagramSocket(LVLPort);
 				while(true){
 					String bloop = "";
