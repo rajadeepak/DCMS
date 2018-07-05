@@ -173,7 +173,7 @@ public class DDOImpl {
 		
 		public String getRecordCounts(String ManagerID)
 		{
-			String s="DDO "+DDOImpl.database.size()+" ";
+			String s="DDO "+getSize()+" ";
 			
 			try {
 				byte[] message = "getRecordCounts".getBytes();
@@ -300,7 +300,7 @@ public class DDOImpl {
 					ddo.receive(request);
 					
 					if(data(buffer).toString().equals("getRecordCounts"))
-						bloop = "DDO "+ String.valueOf(database.size()) + ", "; 
+						bloop = "DDO "+ String.valueOf(getSize()) + ", "; 
 					
 					else if(data(buffer).toString().contains("transferRecord"))
 					{
@@ -349,6 +349,8 @@ public class DDOImpl {
 		
 		public void deleteRecord(String recordID)
 		{
+			
+			printRecords();
 			 Iterator<Entry<String,List<Record>>> it = database.entrySet().iterator();
 			 while(it.hasNext()){
 				 Entry<String,List<Record>> entry = it.next();
@@ -361,9 +363,11 @@ public class DDOImpl {
 						 Record record = (Record) listIt.next();
 						 if(record.Record_ID.equals(recordID))
 							 listIt.remove();
+						 
 					 }
 				 }
 			 }
+			 printRecords();
 		}
 		
 		public String fetchRecord(String recordID)
@@ -402,6 +406,40 @@ public class DDOImpl {
 					 if(e.Record_ID.equals(recordID)) 
 						return true;
 			return false;
+		}
+		
+		public static int getSize()
+		{
+			int size = 0;
+			for(Map.Entry<String, List<Record>> entry : database.entrySet())
+				for(Record e: entry.getValue())
+					if(e.Record_ID.contains("SR"))
+						size++;
+					else
+						size++;
+			return size;
+		}
+		
+		public void printRecords()
+		{
+			for(Map.Entry<String, List<Record>> entry : database.entrySet())
+				for(Record e: entry.getValue())
+				{
+					System.out.println(entry.getKey()+ "-> value "+ e.Record_ID+ " "+e.First_name+" "+e.Last_name);
+					if(e.Record_ID.contains("SR"))
+					{
+						System.out.print(((StudentRecord)e).CoursesRegistered+"\t");
+						System.out.print(((StudentRecord)e).date+"\t");
+						System.out.print(((StudentRecord)e).Status+"\n");
+					}
+					else if(e.Record_ID.startsWith("TR"))
+					{
+						System.out.print(((TeacherRecord)e).Address+"\t");
+						System.out.print(((TeacherRecord)e).Location+"\t");
+						System.out.print(((TeacherRecord)e).Phone+"\t");
+						System.out.print(((TeacherRecord)e).Specialization+"\n");
+					}
+				}
 		}
 	
 }

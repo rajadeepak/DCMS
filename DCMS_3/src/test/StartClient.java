@@ -6,10 +6,15 @@ import javax.xml.ws.WebServiceRef;
 
 import com.LogManager;
 
+
+
 import client.DCMSInterface;
 import client.DDOImplService;
 import client.LVLImplService;
 import client.MTLImplService;
+
+
+
 
 public class StartClient {
 	@WebServiceRef(wsdlLocation="http://localhost:7777/ddo, http://localhost:7777/lvl, http://localhost:7777/mtl")
@@ -32,6 +37,12 @@ public class StartClient {
 	public static int managerIDbase =1000;
 	private static LogManager logger = null;
 	public static Scanner sc;
+//	public static DDOImplService ddo = new DDOImplService();
+//	public static LVLImplService lvl = new LVLImplService();
+//	public static MTLImplService mtl = new MTLImplService();
+//	public static DCMSInterface ddoService = ddo.getDDOImplPort();
+//	public static DCMSInterface lvlService = lvl.getLVLImplPort();
+//	public static DCMSInterface mtlService = mtl.getMTLImplPort();
 	public static DCMSInterface service = null;
 	
 	public StartClient() throws IOException{
@@ -43,27 +54,20 @@ public class StartClient {
 	
 	public static void main(String[] args) throws IOException{
 		
+		DDOImplService ddo = new DDOImplService();
+		LVLImplService lvl = new LVLImplService();
+		MTLImplService mtl = new MTLImplService();
+		DCMSInterface ddoService = ddo.getDDOImplPort();
+		DCMSInterface lvlService = lvl.getLVLImplPort();
+		DCMSInterface mtlService = mtl.getMTLImplPort();
+		
 		StartClient orike = new StartClient();
 		sc = new Scanner(System.in);
 		serverLocation = getManagerInput();
-		
-		if(serverLocation.equalsIgnoreCase("DDO")){
-			
-			DDOImplService ddo = new DDOImplService();
-			service = ddo.getDDOImplPort();
-		}
-		else if(serverLocation.equalsIgnoreCase("LVL")){
-			
-			LVLImplService lvl = new LVLImplService();
-			service = lvl.getLVLImplPort();
-		}
-		else if(serverLocation.equalsIgnoreCase("MTL")){
-			
-			MTLImplService mtl = new MTLImplService();
-			service = mtl.getMTLImplPort();
-		}
+		service = getService(serverLocation, ddoService, lvlService, mtlService);
 
 		String status = "";
+		
 		while(true)  {
 			System.out.println("Select from following operations:");
 			System.out.println("1.create teacher record:");
@@ -117,6 +121,7 @@ public class StartClient {
 			case 6:
 				System.out.println("Manager logged Out. Please login again");
 				serverLocation = getManagerInput();
+				service = getService(serverLocation, ddoService, lvlService, mtlService);
 				break;
 			case 7:
 				System.out.println("Thank you. Exiting!");
@@ -129,6 +134,19 @@ public class StartClient {
 	
 	}
 	
+	public static DCMSInterface getService(String serverLocation, DCMSInterface ddoService, DCMSInterface lvlService, DCMSInterface mtlService)
+	{
+		if(serverLocation.equalsIgnoreCase("DDO"))
+			service = ddoService;
+		
+		else if(serverLocation.equalsIgnoreCase("LVL"))
+			service = lvlService;
+
+		else if(serverLocation.equalsIgnoreCase("MTL"))
+			service = mtlService;
+
+		return service;
+	}
 	public static String getManagerInput() {
 		
 		sc = new Scanner(System.in);

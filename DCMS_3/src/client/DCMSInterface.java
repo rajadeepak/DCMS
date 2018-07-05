@@ -80,18 +80,27 @@ public interface DCMSInterface {
 
     /**
      * 
+     * @param recordID
+     * @param newValue
+     * @param fieldName
      * @param managerID
      * @return
      *     returns java.lang.String
      */
     @WebMethod
     @WebResult(targetNamespace = "")
-    @RequestWrapper(localName = "getRecordCounts", targetNamespace = "http://com/", className = "client.GetRecordCounts")
-    @ResponseWrapper(localName = "getRecordCountsResponse", targetNamespace = "http://com/", className = "client.GetRecordCountsResponse")
-    @Action(input = "http://com/DCMSInterface/getRecordCountsRequest", output = "http://com/DCMSInterface/getRecordCountsResponse")
-    public String getRecordCounts(
+    @RequestWrapper(localName = "editRecord", targetNamespace = "http://com/", className = "client.EditRecord")
+    @ResponseWrapper(localName = "editRecordResponse", targetNamespace = "http://com/", className = "client.EditRecordResponse")
+    @Action(input = "http://com/DCMSInterface/editRecordRequest", output = "http://com/DCMSInterface/editRecordResponse")
+    public String editRecord(
         @WebParam(name = "ManagerID", targetNamespace = "")
-        String managerID);
+        String managerID,
+        @WebParam(name = "RecordID", targetNamespace = "")
+        String recordID,
+        @WebParam(name = "FieldName", targetNamespace = "")
+        String fieldName,
+        @WebParam(name = "NewValue", targetNamespace = "")
+        String newValue);
 
     /**
      * 
@@ -125,26 +134,17 @@ public interface DCMSInterface {
 
     /**
      * 
-     * @param recordID
-     * @param newValue
-     * @param fieldName
      * @param managerID
      * @return
      *     returns java.lang.String
      */
     @WebMethod
     @WebResult(targetNamespace = "")
-    @RequestWrapper(localName = "editRecord", targetNamespace = "http://com/", className = "client.EditRecord")
-    @ResponseWrapper(localName = "editRecordResponse", targetNamespace = "http://com/", className = "client.EditRecordResponse")
-    @Action(input = "http://com/DCMSInterface/editRecordRequest", output = "http://com/DCMSInterface/editRecordResponse")
-    public String editRecord(
+    @RequestWrapper(localName = "getRecordCounts", targetNamespace = "http://com/", className = "client.GetRecordCounts")
+    @ResponseWrapper(localName = "getRecordCountsResponse", targetNamespace = "http://com/", className = "client.GetRecordCountsResponse")
+    @Action(input = "http://com/DCMSInterface/getRecordCountsRequest", output = "http://com/DCMSInterface/getRecordCountsResponse")
+    public String getRecordCounts(
         @WebParam(name = "ManagerID", targetNamespace = "")
-        String managerID,
-        @WebParam(name = "RecordID", targetNamespace = "")
-        String recordID,
-        @WebParam(name = "FieldName", targetNamespace = "")
-        String fieldName,
-        @WebParam(name = "NewValue", targetNamespace = "")
-        String newValue);
+        String managerID);
 
 }

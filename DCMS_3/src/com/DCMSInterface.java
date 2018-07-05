@@ -13,4 +13,5 @@ public interface DCMSInterface {
 	public String getRecordCounts (@WebParam(name="ManagerID") String ManagerID);
 	public String editRecord (@WebParam(name="ManagerID") String ManagerID, @WebParam(name="RecordID") String recordID, @WebParam(name="FieldName") String fieldName, @WebParam(name="NewValue") String newValue);
 	public String transferRecord(@WebParam(name="ManagerID") String managerID, @WebParam(name="RecordID") String recordID, @WebParam(name="NewServerName") String remoteCenterServerName);
+	
 }

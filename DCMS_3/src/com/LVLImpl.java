@@ -72,7 +72,7 @@ public class LVLImpl {
 				logger.writeLog("Error occured while trying to insert teacher record number : "+((TeacherRecord)recobj).Record_ID);
 				return "Failed";
 			}
-			return id;
+			return "Success";
 		}
 
 		public String createSRecord(String ManagerID, String firstName, String lastName, String courseRegistered,
@@ -172,7 +172,7 @@ public class LVLImpl {
 		
 		public String getRecordCounts(String ManagerID)
 		{
-			String s="LVL "+LVLImpl.database.size()+" ";
+			String s="LVL "+getSize()+" ";
 			
 			try {
 				byte[] message = "getRecordCounts".getBytes();
@@ -297,7 +297,7 @@ public class LVLImpl {
 					ddo.receive(request);
 					
 					if(data(buffer).toString().equals("getRecordCounts"))
-						bloop = "LVL "+ String.valueOf(database.size()) + ", "; 
+						bloop = "LVL "+ String.valueOf(getSize()) + ", "; 
 					
 					else if(data(buffer).toString().contains("transferRecord"))
 					{
@@ -399,6 +399,40 @@ public class LVLImpl {
 					 if(e.Record_ID.equals(recordID)) 
 						return true;
 			return false;
+		}
+		
+		public void printRecords()
+		{
+			for(Map.Entry<String, List<Record>> entry : database.entrySet())
+				for(Record e: entry.getValue())
+				{
+					System.out.println(entry.getKey()+ "-> value "+ e.Record_ID+ " "+e.First_name+" "+e.Last_name);
+					if(e.Record_ID.contains("SR"))
+					{
+						System.out.print(((StudentRecord)e).CoursesRegistered+"\t");
+						System.out.print(((StudentRecord)e).date+"\t");
+						System.out.print(((StudentRecord)e).Status+"\n");
+					}
+					else if(e.Record_ID.startsWith("TR"))
+					{
+						System.out.print(((TeacherRecord)e).Address+"\t");
+						System.out.print(((TeacherRecord)e).Location+"\t");
+						System.out.print(((TeacherRecord)e).Phone+"\t");
+						System.out.print(((TeacherRecord)e).Specialization+"\n");
+					}
+				}
+		}
+		
+		public static int getSize()
+		{
+			int size = 0;
+			for(Map.Entry<String, List<Record>> entry : database.entrySet())
+				for(Record e: entry.getValue())
+					if(e.Record_ID.contains("SR"))
+						size++;
+					else
+						size++;
+			return size;
 		}
 	
 }
