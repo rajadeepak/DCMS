@@ -23,7 +23,7 @@ import javax.jws.WebService;
 
 @WebService(endpointInterface="com.DCMSInterface")
 
-public class MTLImpl {
+public class MTLImpl implements Runnable{
 
 	private static int ID = 10000;
 	private LogManager logger = null;
@@ -232,7 +232,7 @@ public class MTLImpl {
 				logger.writeLog("ManagerID: "+managerID+". Transfer Record Failed. Record ID : "+recordID+" Not Found");
 				return "failed";
 			}
-			
+			synchronized(this){
 			String fullRecord;
 			int port;
 			fullRecord = fetchRecord(recordID);
@@ -281,11 +281,11 @@ public class MTLImpl {
 					ds.close();
 			}
 			return "success";
-			
+			}
 		}
 
-		public static void main(String[] args) throws Exception {
-			// TODO Auto-generated method stub
+		@Override
+		public void run() {
 			DatagramSocket ddo = null;
 			try{
 				
