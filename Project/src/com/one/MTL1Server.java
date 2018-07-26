@@ -292,7 +292,75 @@ public class MTL1Server implements Runnable{
 
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
-		
+		DatagramSocket ddo = null;
+		try{
+			MTL1Server obj = new MTL1Server();
+			ddo = new DatagramSocket(MTL1Port);
+			while(true){
+				String bloop = "empty";
+				byte[] buffer = new byte[1000];
+				DatagramPacket request = new DatagramPacket(buffer, buffer.length);
+				ddo.receive(request);
+				
+				if(data(buffer).toString().equals("getRecordCounts"))
+					bloop = "MTL "+ String.valueOf(database.size()) + ", "; 
+				
+				else if(data(buffer).toString().contains("transferRecord"))
+				{
+					
+					String bleep = data(buffer).toString();
+					String parts[] = bleep.split("::");
+					if(parts[2].startsWith("TR"))
+						bloop = obj.createTRecord(parts[1], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8]);
+					else
+						bloop = obj.createSRecord(parts[1], parts[3], parts[4], parts[5], parts[6], parts[7]);
+				}
+				else if(data(buffer).toString().contains("createTRecord"))
+				{
+					String bleep = data(buffer).toString();
+					String parts[] = bleep.split("::");
+					bloop = obj.createTRecord(parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7]);
+				}
+				else if(data(buffer).toString().contains("createSRecord"))
+				{
+					String bleep = data(buffer).toString();
+					String parts[] = bleep.split("::");
+					bloop = obj.createSRecord(parts[1], parts[2], parts[3], parts[4], parts[5], parts[6]);
+				}
+				else if(data(buffer).toString().contains("editRecord"))
+				{
+					String bleep = data(buffer).toString();
+					String parts[] = bleep.split("::");
+					bloop = obj.editRecord(parts[1], parts[2], parts[3], parts[4]);
+				}
+				else if(data(buffer).toString().contains("GRCMethod"))
+				{
+					String bleep = data(buffer).toString();
+					String parts[] = bleep.split("::");
+					bloop = obj.getRecordCounts(parts[1]);
+				}
+				else if(data(buffer).toString().contains("TRMethod"))
+				{
+					String bleep = data(buffer).toString();
+					String parts[] = bleep.split("::");
+					bloop = obj.transferRecord(parts[1], parts[2], parts[3]);
+				}
+				
+				byte[] blah = bloop.getBytes();
+				DatagramPacket reply = new DatagramPacket(blah,blah.length, request.getAddress(), request.getPort());
+				ddo.send(reply);
+				
+			}
+		}catch(SocketException e){
+			System.out.println("Socket Exception: "+e);
+		}
+		catch(IOException e){
+			System.out.println("IO Exception: "+e);
+		}
+		finally{
+			if(ddo != null)
+				ddo.close();
+		}
 	}
 	
 	private static StringBuilder data(byte[] a) {
@@ -384,74 +452,6 @@ public class MTL1Server implements Runnable{
 	public void run() {
 		// TODO Auto-generated method stub
 
-		DatagramSocket ddo = null;
-		try{
-			MTL1Server obj = new MTL1Server();
-			ddo = new DatagramSocket(MTL1Port);
-			while(true){
-				String bloop = "empty";
-				byte[] buffer = new byte[1000];
-				DatagramPacket request = new DatagramPacket(buffer, buffer.length);
-				ddo.receive(request);
-				
-				if(data(buffer).toString().equals("getRecordCounts"))
-					bloop = "MTL "+ String.valueOf(database.size()) + ", "; 
-				
-				else if(data(buffer).toString().contains("transferRecord"))
-				{
-					
-					String bleep = data(buffer).toString();
-					String parts[] = bleep.split("::");
-					if(parts[2].startsWith("TR"))
-						bloop = obj.createTRecord(parts[1], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8]);
-					else
-						bloop = obj.createSRecord(parts[1], parts[3], parts[4], parts[5], parts[6], parts[7]);
-				}
-				else if(data(buffer).toString().contains("createTRecord"))
-				{
-					String bleep = data(buffer).toString();
-					String parts[] = bleep.split("::");
-					bloop = obj.createTRecord(parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7]);
-				}
-				else if(data(buffer).toString().contains("createSRecord"))
-				{
-					String bleep = data(buffer).toString();
-					String parts[] = bleep.split("::");
-					bloop = obj.createSRecord(parts[1], parts[2], parts[3], parts[4], parts[5], parts[6]);
-				}
-				else if(data(buffer).toString().contains("editRecord"))
-				{
-					String bleep = data(buffer).toString();
-					String parts[] = bleep.split("::");
-					bloop = obj.editRecord(parts[1], parts[2], parts[3], parts[4]);
-				}
-				else if(data(buffer).toString().contains("GRCMethod"))
-				{
-					String bleep = data(buffer).toString();
-					String parts[] = bleep.split("::");
-					bloop = obj.getRecordCounts(parts[1]);
-				}
-				else if(data(buffer).toString().contains("TRMethod"))
-				{
-					String bleep = data(buffer).toString();
-					String parts[] = bleep.split("::");
-					bloop = obj.transferRecord(parts[1], parts[2], parts[3]);
-				}
-				
-				byte[] blah = bloop.getBytes();
-				DatagramPacket reply = new DatagramPacket(blah,blah.length, request.getAddress(), request.getPort());
-				ddo.send(reply);
-				
-			}
-		}catch(SocketException e){
-			System.out.println("Socket Exception: "+e);
-		}
-		catch(IOException e){
-			System.out.println("IO Exception: "+e);
-		}
-		finally{
-			if(ddo != null)
-				ddo.close();
-		}
+		
 	}
 }

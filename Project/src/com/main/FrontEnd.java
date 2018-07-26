@@ -4,6 +4,8 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -27,6 +29,9 @@ import com.main.TeacherRecord;
 import CorbaApp.DCMS;
 import CorbaApp.DCMSHelper;
 import CorbaApp.DCMSPOA;
+import fr.slaynash.communication.handlers.OrderedPacketHandler;
+import fr.slaynash.communication.rudp.RUDPClient;
+import fr.slaynash.communication.utils.NetUtils;
 
 import org.omg.CosNaming.*;
 import org.omg.CosNaming.NamingContextPackage.*;
@@ -48,6 +53,7 @@ public class FrontEnd extends DCMSPOA {
 	private int LVL3Port = 1008;
 	private int DDO3Port = 1009;
 	private static int FEPort = 7825;
+	public static RUDPClient client;
 	
     ExecutorService exec = Executors.newFixedThreadPool(10);
     
@@ -78,62 +84,50 @@ public class FrontEnd extends DCMSPOA {
 			String specialization, String location) 
 	{
     	
-    	String msg, result = null;
+    	String msg, result;
 		int port;
-		String ManagerIDTrim = ManagerID.substring(0, 3);
 		
 		msg = "createTRecord"+ "::" + ManagerID + "::" + firstName + "::" + lastName + "::" + address + "::" + phone + "::" + specialization + "::" + location;
-		
-		queue.add(msg);
-		switch(ManagerIDTrim) {
-		case "MTL":
-			break;
-		case "LVL":
-			break;
-		case "DDO":
-			break;
-		default:
-			System.out.println("bloop haha");
-			break;
-		}
-		
-		port = DDO1Port;
-		
-		DatagramSocket ds = null;
-		
-		try {
-			byte[] message = msg.getBytes();
-			byte[] buffer = new byte[1000];
-			
-			ds = new DatagramSocket();
-            InetAddress aHost = InetAddress.getByName("localhost");
-            DatagramPacket request = new DatagramPacket(message, message.length, aHost, port);
-            ds.send(request);
-            DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
-            ds.receive(reply);
-            String response = new String(reply.getData());
-            ds.close();
-            
-            result = response.trim();
-            
-		}catch(SocketException e) {
-			e.printStackTrace();
-		}
-		catch(IOException e) {
-			e.printStackTrace();
-		}
-		finally {
-			if(ds!=null)
-				ds.close();
-		}
-		
-		if(result.equalsIgnoreCase("success"))
-        	logger.writeLog("ManagerID: "+ManagerID+". createTRecord Success.");            
-      
-        else {
-        	logger.writeLog("ManagerID: "+ManagerID+". createTRecord Failed.");
-			return "failed";
-        }
+		port = getPort(ManagerID);
+		result = forwardRequest(msg, port);
+//		queue.add(msg);
+//		
+//		
+//		DatagramSocket ds = null;
+//		
+//		try {
+//			byte[] message = msg.getBytes();
+//			byte[] buffer = new byte[1000];
+//			
+//			ds = new DatagramSocket();
+//            InetAddress aHost = InetAddress.getByName("localhost");
+//            DatagramPacket request = new DatagramPacket(message, message.length, aHost, port);
+//            ds.send(request);
+//            DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
+//            ds.receive(reply);
+//            String response = new String(reply.getData());
+//            ds.close();
+//            
+//            result = response.trim();
+//            
+//		}catch(SocketException e) {
+//			e.printStackTrace();
+//		}
+//		catch(IOException e) {
+//			e.printStackTrace();
+//		}
+//		finally {
+//			if(ds!=null)
+//				ds.close();
+//		}
+//		
+//		if(result.equalsIgnoreCase("success"))
+//        	logger.writeLog("ManagerID: "+ManagerID+". createTRecord Success.");            
+//      
+//        else {
+//        	logger.writeLog("ManagerID: "+ManagerID+". createTRecord Failed.");
+//			return "failed";
+//        }
 		
 		return "success";
 	}
@@ -382,4 +376,60 @@ public class FrontEnd extends DCMSPOA {
 		
 	}
 	
+	public String forwardRequest(String msg, int port)
+	{
+		String result = "blaaaahhhh";
+		int SERVER_PORT = port;
+		RUDPClient client = null;
+		InetAddress SERVER_HOST = NetUtils.getInternetAdress("localhost");
+		byte[] message = msg.getBytes();
+		try {
+			client = new RUDPClient(SERVER_HOST, SERVER_PORT);
+			client.setPacketHandler(OrderedPacketHandler.class);
+			client.connect();
+		}
+		catch(SocketException e) {
+			System.out.println("Cannot allow port for the client. Client can't be launched.");
+			System.exit(-1);
+		}
+		catch(UnknownHostException e) {
+			System.out.println("Unknown host: " + SERVER_HOST);
+			System.exit(-1);
+		}
+		catch(SocketTimeoutException e) {
+			System.out.println("Connection to " + SERVER_HOST + ":" + SERVER_PORT + " timed out.");
+		}
+		catch (InstantiationException e) {} //Given handler class can't be instantiated.
+		catch (IllegalAccessException e) {} //Given handler class can't be accessed.
+		catch(IOException e) {}
+
+		client.sendPacket(message); //Send packet to the server
+		client.sendReliablePacket(message); //Send packet to the server
+
+		client.disconnect(); //Disconnect from server
+		return result;
+	}
+	
+	
+	public int getPort(String ManagerID)
+	{
+		int port;
+
+		String ManagerIDTrim = ManagerID.substring(0, 3);
+		
+		switch(ManagerIDTrim) {
+		case "MTL":
+			break;
+		case "LVL":
+			break;
+		case "DDO":
+			break;
+		default:
+			System.out.println("bloop haha");
+			break;
+		}
+		
+		port = DDO1Port;
+		return port;
+	}
 }
