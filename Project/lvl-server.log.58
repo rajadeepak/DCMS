@@ -1,0 +1,4 @@
+Jul 27, 2018 2:30:50 PM com.main.LogManager writeLog
+INFO: Manager : DDO12;Inserted Student Record Number : SR10000
+Jul 27, 2018 2:32:43 PM com.main.LogManager writeLog
+INFO: Manager : DDO12;Inserted Teacher Record Number : TR10001

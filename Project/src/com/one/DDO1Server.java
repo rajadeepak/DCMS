@@ -1,5 +1,6 @@
 package com.one;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -26,6 +27,7 @@ import com.main.TeacherRecord;
 
 import CorbaApp.DCMSPOA;
 import fr.slaynash.communication.handlers.OrderedPacketHandler;
+import fr.slaynash.communication.handlers.PacketHandler;
 import fr.slaynash.communication.rudp.RUDPClient;
 import fr.slaynash.communication.rudp.RUDPServer;
 import fr.slaynash.communication.utils.NetUtils;
@@ -43,7 +45,7 @@ public class DDO1Server implements Runnable {
 	public static RUDPServer serverInstance;
 	List<Record> records;
 	Record recobj;
-	
+	public static String rudpResponse = "";
 	private int MTL1Port= 1001;
 	private int LVL1Port = 1002;
 	private static int DDO1Port = 1003;
@@ -54,6 +56,7 @@ public class DDO1Server implements Runnable {
 	private int LVL3Port = 1008;
 	private int DDO3Port = 1009;
 	private int FEPort = 7825;
+	public static RUDPServer server;
 	
     ExecutorService exec = Executors.newFixedThreadPool(10);
     
@@ -63,6 +66,112 @@ public class DDO1Server implements Runnable {
 		logger = new LogManager("ddo-server.log");
 	}
 
+    public static class MyPacketHandler extends PacketHandler{
+    	
+		public MyPacketHandler() {
+			// TODO Auto-generated constructor stub
+		}
+		
+		@Override
+		public void onConnection() {
+			System.out.println("Connected");
+		}
+
+		@Override
+		public void onDisconnectedByLocal(String reason) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void onDisconnectedByRemote(String reason) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void onPacketReceived(byte[] data) {
+			
+		}
+
+		@Override
+		public void onReliablePacketReceived(byte[] data) {
+			String rep = new String(data);
+			String bloop = "";
+			DDO1Server obj = null;
+			try {
+				obj = new DDO1Server();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(rep.equals("getRecordCounts"))
+				bloop = "DDO "+ String.valueOf(database.size()); 
+			
+			else if(rep.contains("transferRecord"))
+			{
+				
+				String bleep = rep;
+				String parts[] = bleep.split("::");
+				if(parts[2].startsWith("TR"))
+					bloop = obj.createTRecord(parts[1], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8]);
+				else
+					bloop = obj.createSRecord(parts[1], parts[3], parts[4], parts[5], parts[6], parts[7]);
+			}
+			
+			else if(rep.contains("createTRecord"))
+			{
+				String bleep = rep;
+				String parts[] = bleep.split("::");
+				bloop = obj.createTRecord(parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7]);
+			}
+			
+			else if(rep.contains("createSRecord"))
+			{
+				String bleep = rep;
+				String parts[] = bleep.split("::");
+				bloop = obj.createSRecord(parts[1], parts[2], parts[3], parts[4], parts[5], parts[6]);
+			}
+			
+			else if(rep.contains("editRecord"))
+			{
+				String bleep = rep;
+				String parts[] = bleep.split("::");
+				bloop = obj.editRecord(parts[1], parts[2], parts[3], parts[4]);
+			}
+			
+			else if(rep.contains("GRCMethod"))
+			{
+				String bleep = rep;
+				String parts[] = bleep.split("::");
+				bloop = obj.getRecordCounts(parts[1]);
+			}
+			
+			else if(rep.contains("TRMethod"))
+			{
+				String bleep = rep;
+				String parts[] = bleep.split("::");
+				bloop = obj.transferRecord(parts[1], parts[2], parts[3]);
+			}
+			System.out.println("Waiting for Response...");
+			try {
+				server.getConnectedClients().get(0).sendReliablePacket(bloop.getBytes("UTF-8"));
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+
+		@Override
+		public void onRemoteStatsReturned(int sentRemote, int sentRemoteR, int receivedRemote, int receivedRemoteR) {
+			// TODO Auto-generated method stub
+			
+		}
+
+    }
+    
+    
     public synchronized int genID()
 	{
 		return ID++;
@@ -97,7 +206,7 @@ public class DDO1Server implements Runnable {
 		}
 		return "Success";
 	}
-
+    
 	public String createSRecord(String ManagerID, String firstName, String lastName, String courseRegistered,
 			String status, String statusDate)
 	{
@@ -306,105 +415,17 @@ public class DDO1Server implements Runnable {
 
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
-		DatagramSocket ddo = null;
-		ClientPacketHandler obj = new ClientPacketHandler();
-		String msg = "Hello!";
-		byte[] message = msg.getBytes();
-		int SERVER_PORT = 1003;
-		String bloop = "";
-		
+
 		try {
-			serverInstance = new RUDPServer(SERVER_PORT);
-			serverInstance.setPacketHandler(OrderedPacketHandler.class);
-			serverInstance.start();
+			server = new RUDPServer(DDO1Port);
+			server.setPacketHandler(MyPacketHandler.class);
+			server.start();
 		}
 		catch(SocketException e) {
-			System.out.println("Port " + SERVER_PORT + " is occupied. Server couldn't be initialized.");
+			System.out.println("Port 7825 is occupied. Server couldn't be initialized.");
 			System.exit(-1);
 		}
 
-		//send data to every client
-		for(RUDPClient c : serverInstance.getConnectedClients()) {
-			c.sendPacket(message);
-			c.sendReliablePacket(message);
-		}
-
-		//serverInstance.kick("localhost", 1234); //kick localhost:1234
-		serverInstance.stop();
-	
-		
-//		try{
-//			DDO1Server obj = new DDO1Server();
-//			ddo = new DatagramSocket(DDO1Port);
-//			while(true){
-//				
-//				byte[] buffer = new byte[1000];
-//				DatagramPacket request = new DatagramPacket(buffer, buffer.length);
-//				ddo.receive(request);
-//				
-//				if(data(buffer).toString().equals("getRecordCounts"))
-//					bloop = "DDO "+ String.valueOf(database.size()) + ", "; 
-//				else if(data(buffer).toString().contains("transferRecord"))
-//				{
-//					
-//					String bleep = data(buffer).toString();
-//					String parts[] = bleep.split("::");
-//					if(parts[2].startsWith("TR"))
-//						bloop = obj.createTRecord(parts[1], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8]);
-//					else
-//						bloop = obj.createSRecord(parts[1], parts[3], parts[4], parts[5], parts[6], parts[7]);
-//				}
-//				
-//				else if(data(buffer).toString().contains("createTRecord"))
-//				{
-//					String bleep = data(buffer).toString();
-//					String parts[] = bleep.split("::");
-//					bloop = obj.createTRecord(parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7]);
-//				}
-//				else if(data(buffer).toString().contains("createSRecord"))
-//				{
-//					String bleep = data(buffer).toString();
-//					String parts[] = bleep.split("::");
-//					bloop = obj.createSRecord(parts[1], parts[2], parts[3], parts[4], parts[5], parts[6]);
-//				}
-//				else if(data(buffer).toString().contains("editRecord"))
-//				{
-//					String bleep = data(buffer).toString();
-//					String parts[] = bleep.split("::");
-//					bloop = obj.editRecord(parts[1], parts[2], parts[3], parts[4]);
-//				}
-//				else if(data(buffer).toString().contains("GRCMethod"))
-//				{
-//					String bleep = data(buffer).toString();
-//					String parts[] = bleep.split("::");
-//					bloop = obj.getRecordCounts(parts[1]);
-//				}
-//				else if(data(buffer).toString().contains("TRMethod"))
-//				{
-//					String bleep = data(buffer).toString();
-//					String parts[] = bleep.split("::");
-//					bloop = obj.transferRecord(parts[1], parts[2], parts[3]);
-//				}
-//				
-//				byte[] blah = bloop.getBytes();
-//				DatagramPacket reply = new DatagramPacket(blah,blah.length, request.getAddress(), request.getPort());
-//				ddo.send(reply);
-//				
-//			}
-//			
-//		
-//		}catch(SocketException e){
-//			System.out.println("Socket Exception: "+e);
-//		}
-//		catch(IOException e){
-//			System.out.println("IO Exception: "+e);
-//		}
-//		finally{
-//			if(ddo != null)
-//				ddo.close();
-//		}
-		
-		
 	}
 	
 	public static int getSize()

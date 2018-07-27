@@ -1,6 +1,7 @@
 package com.main;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -60,9 +61,11 @@ public class StartClient {
 				switch(user_choice)
 				{
 				case 1:
+					status = "bad";
 					getTeacherInput();
-					status = server.createTRecord(managerID, First_name, Last_name, Address, Phone, Specialization, Location);
-					if(status.equalsIgnoreCase("success"))
+					status = status+ server.createTRecord(managerID, First_name, Last_name, Address, Phone, Specialization, Location);
+					System.out.println("received status: "+status);
+					if(status.contains("uccess"))
 						logger.writeLog("Operation createTRecord Success. Manager ID: "+managerID);
 					else
 						logger.writeLog("Operation createTRecord Failed. Manager ID: "+managerID);
@@ -146,6 +149,9 @@ public class StartClient {
 	public static void getServer(String[] args, String serverLocation) 
 	{
 		try{
+//			java.util.Properties p = new java.util.Properties();
+//			p.setProperty("com.sun.CORBA.codeset.charsets", "0x05010001, 0x00010109");    // UTF-8, UTF-16
+//			p.setProperty("com.sun.CORBA.codeset.wcharsets", "0x00010109, 0x05010001");    // UTF-16, UTF-8
 			ORB orb = ORB.init(args, null);
 			org.omg.CORBA.Object objRef = orb.resolve_initial_references("NameService");
 			NamingContextExt ncRef = NamingContextExtHelper.narrow(objRef);
