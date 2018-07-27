@@ -460,6 +460,7 @@ public class LVL1Server {
 			System.out.println("Port 8001 is occupied. Server couldn't be initialized.");
 			System.exit(-1);
 		}
+
 	}
 	
 	public synchronized int genID()

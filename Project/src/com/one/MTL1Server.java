@@ -453,9 +453,9 @@ public class MTL1Server {
 		} catch (NamingException | JMSException | IOException e) {
 			e.printStackTrace();
 		}
-		
+	
 		try {
-			server = new RUDPServer(MTL1Port);
+			server = new RUDPServer(DDO1Port);
 			server.setPacketHandler(MyPacketHandler.class);
 			server.start();
 		}

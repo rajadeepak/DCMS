@@ -14,6 +14,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.Destination;
+import javax.jms.JMSException;
+import javax.jms.MessageConsumer;
+import javax.jms.Session;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.print.attribute.ResolutionSyntax;
 
 import org.omg.PortableServer.*;
@@ -103,7 +112,6 @@ public class FrontEnd extends DCMSPOA{
 		logger = new LogManager("FrontEnd.log");
 	}
 
-    
     public synchronized int genID()
 	{
 		return ID++;
@@ -123,10 +131,10 @@ public class FrontEnd extends DCMSPOA{
     public String createTRecord(String ManagerID, String firstName, String lastName, String address, String phone,
 			String specialization, String location) 
 	{
-    	String msg, result;
+    	String msg;
 		int port;
 		
-		msg = "createTRecord"+ "::" + ManagerID + "::" + firstName + "::" + lastName + "::" + address + "::" + phone + "::" + specialization + "::" + location;
+		msg = "true::createTRecord"+ "::" + ManagerID + "::" + firstName + "::" + lastName + "::" + address + "::" + phone + "::" + specialization + "::" + location;
 		port = getPort(ManagerID);
 		forwardRequest(msg, port);
 		
@@ -140,7 +148,7 @@ public class FrontEnd extends DCMSPOA{
 		String msg;
 		int port;
 		
-		msg = "createSRecord"+ "::" + ManagerID + "::" + firstName + "::" + lastName + "::" + courseRegistered + "::" + status + "::" + statusDate;
+		msg = "true::createSRecord"+ "::" + ManagerID + "::" + firstName + "::" + lastName + "::" + courseRegistered + "::" + status + "::" + statusDate;
 		 
 		port = getPort(ManagerID);
 		forwardRequest(msg, port);
@@ -153,7 +161,7 @@ public class FrontEnd extends DCMSPOA{
 		String msg;
 		int port;
 		
-		msg = "editRecord"+ "::" + ManagerID + "::" + recordID + "::" + fieldName + "::" + newValue;
+		msg = "true::editRecord"+ "::" + ManagerID + "::" + recordID + "::" + fieldName + "::" + newValue;
 		 
 		port = getPort(ManagerID);
 		forwardRequest(msg, port);
@@ -166,7 +174,7 @@ public class FrontEnd extends DCMSPOA{
 		String msg;
 		int port;
 		
-		msg = "GRCMethod"+ "::" + ManagerID;
+		msg = "true::GRCMethod"+ "::" + ManagerID;
 		 
 		port = getPort(ManagerID);
 		forwardRequest(msg, port);
@@ -179,7 +187,7 @@ public class FrontEnd extends DCMSPOA{
 		String msg;
 		int port = MTL1Port;
 		
-		msg = "TRMethod"+ "::" + ManagerID + "::" + recordID + "::" + remoteServerName;
+		msg = "true::TRMethod"+ "::" + ManagerID + "::" + recordID + "::" + remoteServerName;
 		 
 		port = getPort(ManagerID);
 		forwardRequest(msg, port);
@@ -189,6 +197,28 @@ public class FrontEnd extends DCMSPOA{
 
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
+		FrontEnd feserver = new FrontEnd();
+		feserver.start();
+
+	}
+	
+	private void start(){
+		
+		try {
+			Context context = new InitialContext(ConfigurationBean.getInstance().getEnv());
+			ConnectionFactory factory = (ConnectionFactory) context.lookup("myJmsFactory");
+			Destination destination = (Destination) context.lookup("queue/heartbeat");
+			
+			Connection connection = factory.createConnection();
+	        connection.start();
+
+	        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+	        MessageConsumer consumer = session.createConsumer(destination);
+	        consumer.setMessageListener(HeartbeatListener.getInstance());
+			
+		} catch (NamingException |JMSException e) {
+			e.printStackTrace();
+		} 
 		
 	}
 	
@@ -202,7 +232,7 @@ public class FrontEnd extends DCMSPOA{
 			byte[] bloop = msg.getBytes();
 			client.sendReliablePacket(bloop);
 			try {
-				Thread.sleep(500);
+				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
