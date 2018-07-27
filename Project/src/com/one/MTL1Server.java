@@ -4,31 +4,30 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.logging.Logger;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
-import org.omg.PortableServer.*;
-import org.omg.CORBA.*;
-import org.omg.PortableServer.POA;
+import javax.jms.JMSException;
+import javax.naming.NamingException;
 
+import com.main.HeartbeatGenerator;
 import com.main.LogManager;
 import com.main.Record;
 import com.main.StudentRecord;
 import com.main.TeacherRecord;
 
-import CorbaApp.DCMSPOA;
-
-import org.omg.CosNaming.*;
-import org.omg.CosNaming.NamingContextPackage.*;
-
-public class MTL1Server implements Runnable{
+public class MTL1Server {
 	
-	private ORB orb;
 	private static int ID = 10000;
 	private LogManager logger = null;
 	public static volatile Map<String,List<Record>> database=new HashMap<String,List<Record>>();
@@ -45,6 +44,7 @@ public class MTL1Server implements Runnable{
 	private int DDO3Port = 1009;
 	private int FEPort = 7825;
     ExecutorService exec = Executors.newFixedThreadPool(10);
+    private static ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
     
 	public MTL1Server() throws IOException 
 	{
@@ -291,7 +291,11 @@ public class MTL1Server implements Runnable{
 	}
 
 	public static void main(String[] args) throws Exception {
-		// TODO Auto-generated method stub
+		try {
+			executor.scheduleAtFixedRate(new HeartbeatGenerator("MTL1"), 1 , 5, TimeUnit.SECONDS);
+		} catch (NamingException | JMSException | IOException e) {
+			e.printStackTrace();
+		}
 		DatagramSocket ddo = null;
 		try{
 			MTL1Server obj = new MTL1Server();
@@ -448,10 +452,5 @@ public class MTL1Server implements Runnable{
 		return size;
 	}
 
-	@Override
-	public void run() {
-		// TODO Auto-generated method stub
-
-		
-	}
+	
 }
