@@ -1,5 +1,9 @@
 package com.main;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Hashtable;
+
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
@@ -11,26 +15,23 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-public class ElectionTrigger implements Runnable {
+public class VoteTrigger implements Runnable{
 
-	
-	private String clustername;
+	private String vote_stamp;
 	private Connection connection;
 	private Session session;
 	private MessageProducer producer;
 	
-	public ElectionTrigger(String clustername) throws NamingException, JMSException {
-
-		this.clustername = clustername;
+	public VoteTrigger(String s) throws NamingException, JMSException, FileNotFoundException, IOException {
 		
-		ConfigurationBean.getInstance().master_servers.put(clustername, -1);
-		
+		this.vote_stamp = s;
 		Context context = new InitialContext(ConfigurationBean.getInstance().getEnv());
         ConnectionFactory factory = (ConnectionFactory) context.lookup("myJmsFactory");
-        Destination destination = (Destination) context.lookup("topic/election");
+        Destination destination = (Destination) context.lookup("queue/voting");
 
-        connection = factory.createConnection();
         
+        connection = factory.createConnection();
+
         session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
         
         producer = session.createProducer(destination);
@@ -40,14 +41,14 @@ public class ElectionTrigger implements Runnable {
 	
 	@Override
 	public void run() {
+		TextMessage heartbeatMessage = null;
 		try {
-			TextMessage message = session.createTextMessage("ELECTIONBEGIN::"+clustername);
-			System.out.println("Sending message to topic : "+message.getText());
-			producer.send(message);
+			heartbeatMessage = session.createTextMessage(vote_stamp);
+			System.out.println(vote_stamp+" vote cast");
+			producer.send(heartbeatMessage);
 		} catch (JMSException e) {
 			e.printStackTrace();
 		}
-   	 	
 	}
 
 }

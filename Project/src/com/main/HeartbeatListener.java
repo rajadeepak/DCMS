@@ -7,6 +7,7 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.TextMessage;
+import javax.naming.NamingException;
 
 /**
  * @author harvi
@@ -28,11 +29,40 @@ public class HeartbeatListener implements MessageListener {
 	public void onMessage(Message m) {
 		TextMessage t = (TextMessage) m;
 		try {
-			DatabaseBean.getInstance().lastHeartbeat.put(t.getText().split("::")[0], Long.parseLong(t.getText().split("::")[1]));
+			String server = t.getText().split("::")[0];
+			Long timestamp = Long.parseLong(t.getText().split("::")[1]);
+			DatabaseBean.getInstance().lastHeartbeat.put(server, timestamp);
+			
+			String last = checkTimeElapsedSinceLastHeartbeat(System.currentTimeMillis());
+			
+			if(last != null){
+				System.out.println("Trigger Election for : "+last);
+				try {
+					Thread electionThread = new Thread(new ElectionTrigger(last.substring(0, 3)));
+					electionThread.start();
+				} catch (NamingException e) {
+					e.printStackTrace();
+				}
+				
+			}
+			
 			System.out.println(t.getText());
 		} catch (JMSException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private String checkTimeElapsedSinceLastHeartbeat(Long timestamp){
+		for(String server :DatabaseBean.getInstance().lastHeartbeat.keySet()){
+			Long previous = DatabaseBean.getInstance().lastHeartbeat.get(server);
+			long diff = Math.subtractExact(timestamp, previous);
+			
+			if(diff>10000 && 
+					ConfigurationBean.getInstance().master_servers.get(server.substring(0, 3)) != -1){
+				return server;
+			}
+		}
+		return null;
 	}
 
 }
