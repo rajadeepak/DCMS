@@ -5,27 +5,28 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-import org.omg.PortableServer.*;
-import org.omg.CORBA.*;
-import org.omg.PortableServer.POA;
+import javax.jms.JMSException;
+import javax.naming.NamingException;
 
+import com.main.HeartbeatGenerator;
 import com.main.LogManager;
 import com.main.Record;
 import com.main.StudentRecord;
 import com.main.TeacherRecord;
+import com.main.FrontEnd.MyPacketHandler;
 
-import CorbaApp.DCMSPOA;
 import fr.slaynash.communication.handlers.OrderedPacketHandler;
 import fr.slaynash.communication.handlers.PacketHandler;
 import fr.slaynash.communication.rudp.RUDPClient;
@@ -33,40 +34,49 @@ import fr.slaynash.communication.rudp.RUDPServer;
 import fr.slaynash.communication.utils.NetUtils;
 import fr.slaynash.test.RouterClientTest.ClientPacketHandler;
 
-import org.omg.CosNaming.*;
-import org.omg.CosNaming.NamingContextPackage.*;
+public class DDO1Server {
 
-public class DDO1Server implements Runnable {
-
-	private ORB orb;
-	private static int ID = 10000;
-	private LogManager logger = null;
-	public static volatile Map<String,List<Record>> database=new HashMap<String,List<Record>>();
-	public static RUDPServer serverInstance;
+	private static int MTL1Port= 7001;
+	private static int LVL1Port = 8001;
+	private static int DDO1Port = 9001;
+	private static int MTL2Port= 7002;
+	private static int LVL2Port = 8002;
+	private static int DDO2Port = 9002;
+	private static int MTL3Port= 7003;
+	private static int LVL3Port = 8003;
+	private static int DDO3Port = 9003;
+	private static int FEPort = 7825;
+	
+	public  volatile Map<String,List<Record>> database=new HashMap<String,List<Record>>();
 	List<Record> records;
 	Record recobj;
-	public static String rudpResponse = "";
-	private int MTL1Port= 1001;
-	private int LVL1Port = 1002;
-	private static int DDO1Port = 1003;
-	private int MTL2Port= 1004;
-	private int LVL2Port = 1005;
-	private int DDO2Port = 1006;
-	private int MTL3Port= 1007;
-	private int LVL3Port = 1008;
-	private int DDO3Port = 1009;
-	private int FEPort = 7825;
-	public static RUDPServer server;
 	
-    ExecutorService exec = Executors.newFixedThreadPool(10);
+	private int ID = 10000;
+	private LogManager logger = null;
+	
+	public RUDPServer server;
+	public static String rudpResponse = "";
+	
+	ExecutorService exec = Executors.newFixedThreadPool(10);
+    private static ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
     
-    public DDO1Server() throws IOException 
-    {
+	private static DDO1Server serverInstance = new DDO1Server();
+	
+	private DDO1Server() {
 		super();
-		logger = new LogManager("ddo-server.log");
+		try {
+			logger = new LogManager("ddo-1-server.log");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
+	
+	public static DDO1Server getInstance() {
+		return serverInstance;
 	}
 
-    public static class MyPacketHandler extends PacketHandler{
+	public static class MyPacketHandler extends PacketHandler{
     	
 		public MyPacketHandler() {
 			// TODO Auto-generated constructor stub
@@ -98,15 +108,9 @@ public class DDO1Server implements Runnable {
 		public void onReliablePacketReceived(byte[] data) {
 			String rep = new String(data);
 			String bloop = "";
-			DDO1Server obj = null;
-			try {
-				obj = new DDO1Server();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			
 			if(rep.equals("getRecordCounts"))
-				bloop = "DDO "+ String.valueOf(database.size()); 
+				bloop = "DDO "+ String.valueOf(DDO1Server.getInstance().database.size()); 
 			
 			else if(rep.contains("transferRecord"))
 			{
@@ -114,48 +118,81 @@ public class DDO1Server implements Runnable {
 				String bleep = rep;
 				String parts[] = bleep.split("::");
 				if(parts[2].startsWith("TR"))
-					bloop = obj.createTRecord(parts[1], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8]);
+					bloop = DDO1Server.getInstance().createTRecord(parts[1], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8]);
 				else
-					bloop = obj.createSRecord(parts[1], parts[3], parts[4], parts[5], parts[6], parts[7]);
+					bloop = DDO1Server.getInstance().createSRecord(parts[1], parts[3], parts[4], parts[5], parts[6], parts[7]);
 			}
 			
 			else if(rep.contains("createTRecord"))
 			{
 				String bleep = rep;
 				String parts[] = bleep.split("::");
-				bloop = obj.createTRecord(parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7]);
+				if(parts[0].equalsIgnoreCase("true"))
+				{
+					String str = rep.replace("true", "false");
+					DDO1Server.getInstance().forwardRequest(str,DDO2Port);
+					DDO1Server.getInstance().forwardRequest(str,DDO3Port);
+				}
+					
+				bloop = DDO1Server.getInstance().createTRecord(parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8]);
 			}
 			
 			else if(rep.contains("createSRecord"))
 			{
 				String bleep = rep;
 				String parts[] = bleep.split("::");
-				bloop = obj.createSRecord(parts[1], parts[2], parts[3], parts[4], parts[5], parts[6]);
+				if(parts[0].equalsIgnoreCase("true"))
+				{
+					String str = rep.replace("true", "false");
+					DDO1Server.getInstance().forwardRequest(str,DDO2Port);
+					DDO1Server.getInstance().forwardRequest(str,DDO3Port);
+				}
+				bloop = DDO1Server.getInstance().createSRecord(parts[1], parts[2], parts[3], parts[4], parts[5], parts[6]);
 			}
 			
 			else if(rep.contains("editRecord"))
 			{
 				String bleep = rep;
 				String parts[] = bleep.split("::");
-				bloop = obj.editRecord(parts[1], parts[2], parts[3], parts[4]);
+				if(parts[0].equalsIgnoreCase("true"))
+				{
+					String str = rep.replace("true", "false");
+					DDO1Server.getInstance().forwardRequest(str,DDO2Port);
+					DDO1Server.getInstance().forwardRequest(str,DDO3Port);
+				}
+				bloop = DDO1Server.getInstance().editRecord(parts[1], parts[2], parts[3], parts[4]);
 			}
 			
 			else if(rep.contains("GRCMethod"))
 			{
 				String bleep = rep;
 				String parts[] = bleep.split("::");
-				bloop = obj.getRecordCounts(parts[1]);
+				if(parts[0].equalsIgnoreCase("true"))
+				{
+					String str = rep.replace("true", "false");
+					DDO1Server.getInstance().forwardRequest(str,DDO2Port);
+					DDO1Server.getInstance().forwardRequest(str,DDO3Port);
+				}
+				bloop = DDO1Server.getInstance().getRecordCounts(parts[1]);
 			}
 			
 			else if(rep.contains("TRMethod"))
 			{
 				String bleep = rep;
 				String parts[] = bleep.split("::");
-				bloop = obj.transferRecord(parts[1], parts[2], parts[3]);
+				if(parts[0].equalsIgnoreCase("true"))
+				{
+					String str = rep.replace("true", "false");
+					DDO1Server.getInstance().forwardRequest(str,DDO2Port);
+					DDO1Server.getInstance().forwardRequest(str,DDO3Port);
+				}
+				bloop = DDO1Server.getInstance().transferRecord(parts[1], parts[2], parts[3]);
 			}
-			System.out.println("Waiting for Response...");
+			
+			System.out.println("Request Transferred over Reliable UDP");
+			
 			try {
-				server.getConnectedClients().get(0).sendReliablePacket(bloop.getBytes("UTF-8"));
+				DDO1Server.getInstance().server.getConnectedClients().get(0).sendReliablePacket(bloop.getBytes("UTF-8"));
 			} catch (UnsupportedEncodingException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -171,13 +208,6 @@ public class DDO1Server implements Runnable {
 
     }
     
-    
-    public synchronized int genID()
-	{
-		return ID++;
-	}
-    
-	
     public String createTRecord(String ManagerID, String firstName, String lastName, String address, String phone,
 			String specialization, String location) 
 	{
@@ -187,15 +217,15 @@ public class DDO1Server implements Runnable {
 			recobj=new TeacherRecord(firstName, lastName, address, phone, specialization, location, id);
 			
 			synchronized(this) {
-				if(DDO1Server.database.containsKey(key)){
-					records=DDO1Server.database.get(key);
+				if(database.containsKey(key)){
+					records=database.get(key);
 					records.add(recobj);
-					DDO1Server.database.put(key, records);
+					database.put(key, records);
 				}
 				else{
 					records=new ArrayList<Record>();
 					records.add(recobj);
-					DDO1Server.database.put(key, records);
+					database.put(key, records);
 				}
 				logger.writeLog("Manager : "+ManagerID+";Inserted Teacher Record Number : "+ ((TeacherRecord)recobj).Record_ID);
 			}
@@ -311,7 +341,6 @@ public class DDO1Server implements Runnable {
 			byte[] buffer2 = new byte[1000];
 			
 			Future<String> mtlResponse = exec.submit(new Callable<String>() {
-
 				@Override
 				public String call() throws Exception {
 					DatagramSocket ds = new DatagramSocket();
@@ -325,8 +354,6 @@ public class DDO1Server implements Runnable {
 					ds.close();
 					return a;
 				}
-				
-				
 			});
 			
 			Future<String> lvlResponse = exec.submit(new Callable<String>() {
@@ -375,7 +402,6 @@ public class DDO1Server implements Runnable {
 		
 		DatagramSocket ds = null;
 
-		
 		try {
 			byte[] message = msg.getBytes();
 			byte[] buffer = new byte[1000];
@@ -414,21 +440,33 @@ public class DDO1Server implements Runnable {
 	}
 
 	public static void main(String[] args) throws Exception {
-		// TODO Auto-generated method stub
-
+		
+		try {
+			executor.scheduleAtFixedRate(new HeartbeatGenerator("DDO1"), 1 , 5, TimeUnit.SECONDS);
+		} catch (NamingException | JMSException | IOException e) {
+			e.printStackTrace();
+		}
+		getInstance().startServer();
+	}
+    
+	private void startServer() {
 		try {
 			server = new RUDPServer(DDO1Port);
 			server.setPacketHandler(MyPacketHandler.class);
 			server.start();
 		}
 		catch(SocketException e) {
-			System.out.println("Port 7825 is occupied. Server couldn't be initialized.");
+			System.out.println("Port 9001 is occupied. Server couldn't be initialized.");
 			System.exit(-1);
 		}
-
 	}
 	
-	public static int getSize()
+    public synchronized int genID()
+	{
+		return ID++;
+	}
+  
+	public int getSize()
 	{
 		int size = 0;
 		for(Map.Entry<String, List<Record>> entry : database.entrySet())
@@ -440,40 +478,15 @@ public class DDO1Server implements Runnable {
 		return size;
 	}
 	
-	private static StringBuilder data(byte[] a) {
-		// TODO Auto-generated method stub
-
-		if(a==null)
-		return null;
-		StringBuilder ret=new StringBuilder();
-		int i=0;
-		while(a[i] !=0) {
-			
-			ret.append((char) a[i]);
-			i++;
-		}
-		return ret;
-	}
-	
-	public void deleteRecord(String recordID)
+	public boolean checkRecordID(String recordID) 
 	{
-		 Iterator<Entry<String,List<Record>>> it = database.entrySet().iterator();
-		 while(it.hasNext()){
-			 Entry<String,List<Record>> entry = it.next();
-			 List<Record> recordList = (ArrayList<Record>) entry.getValue();
-			 
-			 synchronized(this){
-				 Iterator listIt = recordList.iterator();
-				 
-				 while(listIt.hasNext()){
-					 Record record = (Record) listIt.next();
-					 if(record.Record_ID.equals(recordID))
-						 listIt.remove();
-				 }
-			 }
-		 }
+		for(Map.Entry<String, List<Record>> entry : database.entrySet())
+			for(Record e: entry.getValue())
+				 if(e.Record_ID.equals(recordID)) 
+					return true;
+		return false;
 	}
-	
+
 	public String fetchRecord(String recordID)
 	{
 		String bloop = "";
@@ -503,18 +516,56 @@ public class DDO1Server implements Runnable {
 		return bloop;
 	}
 	
-	public boolean checkRecordID(String recordID) 
+	public void deleteRecord(String recordID)
 	{
-		for(Map.Entry<String, List<Record>> entry : database.entrySet())
-			for(Record e: entry.getValue())
-				 if(e.Record_ID.equals(recordID)) 
-					return true;
-		return false;
+		 Iterator<Entry<String,List<Record>>> it = database.entrySet().iterator();
+		 while(it.hasNext()){
+			 Entry<String,List<Record>> entry = it.next();
+			 List<Record> recordList = (ArrayList<Record>) entry.getValue();
+			 
+			 synchronized(this){
+				 Iterator listIt = recordList.iterator();
+				 
+				 while(listIt.hasNext()){
+					 Record record = (Record) listIt.next();
+					 if(record.Record_ID.equals(recordID))
+						 listIt.remove();
+				 }
+			 }
+		 }
 	}
-
-	@Override
-	public void run() {
-		// TODO Auto-generated method stub
-	}	
+	
+	public void forwardRequest(String msg, int port)
+	{
+		try {
+			InetAddress inet = InetAddress.getLocalHost();
+			RUDPClient client = new RUDPClient(inet, port);
+			client.setPacketHandler(MyPacketHandler.class);
+			client.connect();
+			byte[] bloop = msg.getBytes();
+			client.sendReliablePacket(bloop);
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+		catch(SocketException e) {
+			System.out.println("Cannot allow port for the client. Client can't be launched.");
+			System.exit(-1);
+		}
+		catch(UnknownHostException e) {
+			System.out.println("Unknown host: " + port);
+			System.exit(-1);
+		}
+		catch(SocketTimeoutException e) {
+			System.out.println("Connection to " + port + " timed out.");
+		}
+		catch (InstantiationException e) {} //Given handler class can't be instantiated.
+		catch (IllegalAccessException e) {} //Given handler class can't be accessed.
+		catch(IOException e) {}
+	}
 	
 }
