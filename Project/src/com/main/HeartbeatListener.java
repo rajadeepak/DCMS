@@ -34,10 +34,11 @@ public class HeartbeatListener implements MessageListener {
 			DatabaseBean.getInstance().lastHeartbeat.put(server, timestamp);
 			
 			String last = checkTimeElapsedSinceLastHeartbeat(System.currentTimeMillis());
-			
+			Long portNum = ConfigurationBean.getInstance().getPortNumberForServer(last);
 			if(last != null){
 				System.out.println("Trigger Election for : "+last);
 				try {
+					DatabaseBean.getInstance().lastHeartbeat.remove(last);
 					Thread electionThread = new Thread(new ElectionTrigger(last.substring(0, 3)));
 					electionThread.start();
 				} catch (NamingException e) {

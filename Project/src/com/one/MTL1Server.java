@@ -455,7 +455,7 @@ public class MTL1Server {
 		}
 	
 		try {
-			server = new RUDPServer(DDO1Port);
+			server = new RUDPServer(MTL1Port);
 			server.setPacketHandler(MyPacketHandler.class);
 			server.start();
 		}

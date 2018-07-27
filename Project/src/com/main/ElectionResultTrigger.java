@@ -44,7 +44,7 @@ public class ElectionResultTrigger implements Runnable {
 	@Override
 	public void run() {
 		try {
-			TextMessage message = session.createTextMessage("ELECTIONBEGIN::"+serverName.substring(0, 3)+"::"+portNumber);
+			TextMessage message = session.createTextMessage("ELECTIONRESULT::"+serverName.substring(0, 3)+"::"+portNumber);
 			System.out.println("Publishing election result to topic : "+message.getText());
 			producer.send(message);
 		} catch (JMSException e) {
