@@ -27,6 +27,7 @@ import com.main.Record;
 import com.main.StudentRecord;
 import com.main.TeacherRecord;
 import com.main.FrontEnd.MyPacketHandler;
+import com.one.LVL1Server;
 
 import fr.slaynash.communication.handlers.OrderedPacketHandler;
 import fr.slaynash.communication.handlers.PacketHandler;
@@ -47,6 +48,9 @@ public class DDO2Server {
 	private static int LVL3Port = 8003;
 	private static int DDO3Port = 9003;
 	private static int FEPort = 7825;
+	private static int MTLPort2= 7005;
+	private static int DDOPort2= 9005;
+	private static int LVLPort2= 8005;
 	
 	public  volatile Map<String,List<Record>> database=new HashMap<String,List<Record>>();
 	List<Record> records;
@@ -109,6 +113,7 @@ public class DDO2Server {
 		public void onReliablePacketReceived(byte[] data) {
 			String rep = new String(data);
 			String bloop = "";
+			System.out.println("msg received : "+rep);
 			
 			if(rep.equals("getRecordCounts"))
 				bloop = "DDO "+ String.valueOf(DDO2Server.getInstance().database.size()); 
@@ -128,6 +133,7 @@ public class DDO2Server {
 			{
 				String bleep = rep;
 				String parts[] = bleep.split("::");
+				bloop = DDO2Server.getInstance().createTRecord(parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8]);
 				if(parts[0].contains("true"))
 				{
 					String str = rep.replace("true", "false");
@@ -135,59 +141,65 @@ public class DDO2Server {
 					DDO2Server.getInstance().forwardRequest(str,DDO3Port);
 				}
 					
-				bloop = DDO2Server.getInstance().createTRecord(parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8]);
+				
 			}
 			
 			else if(rep.contains("createSRecord"))
 			{
 				String bleep = rep;
 				String parts[] = bleep.split("::");
+				bloop = DDO2Server.getInstance().createSRecord(parts[2], parts[3], parts[4], parts[5], parts[6], parts[7]);
 				if(parts[0].contains("true"))
 				{
 					String str = rep.replace("true", "false");
 					DDO2Server.getInstance().forwardRequest(str,DDO1Port);
 					DDO2Server.getInstance().forwardRequest(str,DDO3Port);
 				}
-				bloop = DDO2Server.getInstance().createSRecord(parts[1], parts[2], parts[3], parts[4], parts[5], parts[6]);
+				
 			}
 			
 			else if(rep.contains("editRecord"))
 			{
 				String bleep = rep;
 				String parts[] = bleep.split("::");
+				bloop = DDO2Server.getInstance().editRecord(parts[2], parts[3], parts[4], parts[5]);
 				if(parts[0].contains("true"))
 				{
 					String str = rep.replace("true", "false");
 					DDO2Server.getInstance().forwardRequest(str,DDO1Port);
 					DDO2Server.getInstance().forwardRequest(str,DDO3Port);
 				}
-				bloop = DDO2Server.getInstance().editRecord(parts[1], parts[2], parts[3], parts[4]);
+				
 			}
 			
 			else if(rep.contains("GRCMethod"))
 			{
 				String bleep = rep;
 				String parts[] = bleep.split("::");
+//				System.out.println("Working111 "+parts[2]);
+				bloop = DDO2Server.getInstance().getRecordCounts(parts[2]);
+//				System.out.println("Working??? "+bloop);
 				if(parts[0].contains("true"))
 				{
 					String str = rep.replace("true", "false");
 					DDO2Server.getInstance().forwardRequest(str,DDO1Port);
 					DDO2Server.getInstance().forwardRequest(str,DDO3Port);
 				}
-				bloop = DDO2Server.getInstance().getRecordCounts(parts[1]);
+				
 			}
 			
 			else if(rep.contains("TRMethod"))
 			{
 				String bleep = rep;
 				String parts[] = bleep.split("::");
+				bloop = DDO2Server.getInstance().transferRecord(parts[2], parts[3], parts[4]);
 				if(parts[0].contains("true"))
 				{
 					String str = rep.replace("true", "false");
 					DDO2Server.getInstance().forwardRequest(str,DDO1Port);
 					DDO2Server.getInstance().forwardRequest(str,DDO3Port);
 				}
-				bloop = DDO2Server.getInstance().transferRecord(parts[1], parts[2], parts[3]);
+				
 			}
 			
 			System.out.println("Request Transferred over Reliable UDP");
@@ -346,7 +358,7 @@ public class DDO2Server {
 				public String call() throws Exception {
 					DatagramSocket ds = new DatagramSocket();
 					InetAddress aHost = InetAddress.getByName("localhost");
-					DatagramPacket request = new DatagramPacket(message, message.length, aHost, MTL2Port);
+					DatagramPacket request = new DatagramPacket(message, message.length, aHost, MTLPort2);
 					ds.send(request);
 					DatagramPacket reply1 = new DatagramPacket(buffer1, buffer1.length);
 					ds.receive(reply1);
@@ -363,7 +375,7 @@ public class DDO2Server {
 				public String call() throws Exception {
 					DatagramSocket ds = new DatagramSocket();
 					InetAddress aHost = InetAddress.getByName("localhost");
-					DatagramPacket request = new DatagramPacket(message, message.length, aHost, LVL2Port);
+					DatagramPacket request = new DatagramPacket(message, message.length, aHost, LVLPort2);
 					ds.send(request);
 					DatagramPacket reply2 = new DatagramPacket(buffer2, buffer2.length);
 					ds.receive(reply2);
@@ -397,9 +409,9 @@ public class DDO2Server {
 		String msg = "transferRecord::" + managerID + "::" + fullRecord;
 		
 		if(remoteServerName.equalsIgnoreCase("MTL"))
-			port = MTL2Port;
+			port = MTLPort2;
 		else
-			port = LVL2Port;
+			port = LVLPort2;
 		
 		DatagramSocket ds = null;
 
@@ -443,6 +455,46 @@ public class DDO2Server {
 	public static void main(String[] args) throws Exception {
 		
 		getInstance().startServer();
+		
+		DatagramSocket ddo = null;
+		try{
+			
+			ddo = new DatagramSocket(DDOPort2);
+			while(true){
+				String bloop = "";
+				byte[] buffer = new byte[1000];
+				
+				DatagramPacket request = new DatagramPacket(buffer, buffer.length);
+				ddo.receive(request);
+				
+				if(data(buffer).toString().equals("getRecordCounts"))
+					bloop = "DDO "+ String.valueOf(DDO2Server.getInstance().getSize()) + ", "; 
+				
+				else if(data(buffer).toString().contains("transferRecord"))
+				{
+					String bleep = data(buffer).toString();
+					String parts[] = bleep.split("::");
+					if(parts[2].startsWith("TR"))
+						bloop = DDO2Server.getInstance().createTRecord(parts[1], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8]);
+					else
+						bloop = DDO2Server.getInstance().createSRecord(parts[1], parts[3], parts[4], parts[5], parts[6], parts[7]);
+				}
+				
+				byte[] blah = bloop.getBytes();
+				DatagramPacket reply = new DatagramPacket(blah,blah.length, request.getAddress(), request.getPort());
+				ddo.send(reply);
+				
+			}
+		}catch(SocketException e){
+			System.out.println("Socket Exception: "+e);
+		}
+		catch(IOException e){
+			System.out.println("IO Exception: "+e);
+		}
+		finally{
+			if(ddo != null)
+				ddo.close();
+		}
 	}
 	
 	private void startServer() {
@@ -547,7 +599,7 @@ public class DDO2Server {
 			byte[] bloop = msg.getBytes();
 			client.sendReliablePacket(bloop);
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(500);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -569,5 +621,19 @@ public class DDO2Server {
 		catch (IllegalAccessException e) {} //Given handler class can't be accessed.
 		catch(IOException e) {}
 	}
-	
+	private static StringBuilder data(byte[] a) {
+		// TODO Auto-generated method stub
+		
+		
+		if(a==null)
+		return null;
+		StringBuilder ret=new StringBuilder();
+		int i=0;
+		while(a[i] !=0) {
+			
+			ret.append((char) a[i]);
+			i++;
+		}
+		return ret;
+	}
 }

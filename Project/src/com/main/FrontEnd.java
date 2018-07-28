@@ -40,6 +40,7 @@ import CorbaApp.DCMSPOA;
 import fr.slaynash.communication.handlers.OrderedPacketHandler;
 import fr.slaynash.communication.handlers.PacketHandler;
 import fr.slaynash.communication.rudp.RUDPClient;
+import fr.slaynash.communication.rudp.RUDPServer;
 import fr.slaynash.communication.utils.NetUtils;
 
 import org.omg.CosNaming.*;
@@ -53,7 +54,7 @@ public class FrontEnd extends DCMSPOA{
 	public static DCMS server;
 	private int MTL1Port= 1001;
 	private int LVL1Port = 1002;
-	private  int DDO1Port = 1003;
+	private int DDO1Port = 1003;
 	private int MTL2Port= 1004;
 	private int LVL2Port = 1005;
 	private int DDO2Port = 1006;
@@ -137,7 +138,7 @@ public class FrontEnd extends DCMSPOA{
 		msg = "true::createTRecord"+ "::" + ManagerID + "::" + firstName + "::" + lastName + "::" + address + "::" + phone + "::" + specialization + "::" + location;
 		port = getPort(ManagerID);
 		forwardRequest(msg, port);
-		
+//		System.out.println("returning: "+rudpResponse);
 		return rudpResponse;
 	}
 
@@ -251,13 +252,19 @@ public class FrontEnd extends DCMSPOA{
 			client.setPacketHandler(MyPacketHandler.class);
 			client.connect();
 			byte[] bloop = msg.getBytes();
+			rudpResponse = "";
 			client.sendReliablePacket(bloop);
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			while(rudpResponse.equals(""))
+			{
+				try {
+					Thread.sleep(3000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				System.out.println("Transferring over Reliable UDP...");
 			}
+			
 			
 		}
 		catch(SocketException e) {

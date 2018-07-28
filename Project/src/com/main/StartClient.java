@@ -54,17 +54,15 @@ public class StartClient {
 				System.out.println("3.Get record counts:");
 				System.out.println("4.Edit Record:");
 				System.out.println("5.Transfer Record:");
-				System.out.println("6.Logout as the current manager:");
-				System.out.println("7.Exit");
+//				System.out.println("6.Logout as the current manager:");
+				System.out.println("6.Exit");
 			
 				int user_choice=sc.nextInt();
 				switch(user_choice)
 				{
 				case 1:
-					status = "bad";
 					getTeacherInput();
 					status = status+ server.createTRecord(managerID, First_name, Last_name, Address, Phone, Specialization, Location);
-					System.out.println("received status: "+status);
 					if(status.contains("uccess"))
 						logger.writeLog("Operation createTRecord Success. Manager ID: "+managerID);
 					else
@@ -99,10 +97,8 @@ public class StartClient {
 						logger.writeLog("Operation transferRecord Failed. Manager ID: "+managerID);
 					break;
 				case 6:
-					System.out.println("Manager logged Out. Please login again");
-					getManagerInput();
-				    getServer(args, serverLocation);
-					break;
+					System.out.println("Thank you. Exiting!");
+					return;
 				case 7:
 					System.out.println("Thank you. Exiting!");
 					return;

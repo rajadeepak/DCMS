@@ -29,6 +29,7 @@ import com.main.LogManager;
 import com.main.Record;
 import com.main.StudentRecord;
 import com.main.TeacherRecord;
+import com.one.LVL1Server;
 import com.one.DDO1Server.MyPacketHandler;
 
 import fr.slaynash.communication.handlers.PacketHandler;
@@ -47,6 +48,9 @@ public class MTL3Server {
 	private static int LVL3Port = 8003;
 	private static int DDO3Port = 9003;
 	private static int FEPort = 7825;
+	private static int MTLPort3= 7006;
+	private static int DDOPort3= 9006;
+	private static int LVLPort3= 8006;
 	
 	public volatile Map<String,List<Record>> database=new HashMap<String,List<Record>>();
 	List<Record> records;
@@ -128,6 +132,7 @@ public class MTL3Server {
 			{
 				String bleep = rep;
 				String parts[] = bleep.split("::");
+				bloop = MTL3Server.getInstance().createTRecord(parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8]);
 				if(parts[0].contains("true"))
 				{
 					String str = rep.replace("true", "false");
@@ -135,59 +140,63 @@ public class MTL3Server {
 					MTL3Server.getInstance().forwardRequest(str,MTL1Port);
 				}
 					
-				bloop = MTL3Server.getInstance().createTRecord(parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8]);
+				
 			}
 			
 			else if(rep.contains("createSRecord"))
 			{
 				String bleep = rep;
 				String parts[] = bleep.split("::");
+				bloop = MTL3Server.getInstance().createSRecord(parts[2], parts[3], parts[4], parts[5], parts[6], parts[7]);
 				if(parts[0].contains("true"))
 				{
 					String str = rep.replace("true", "false");
 					MTL3Server.getInstance().forwardRequest(str,MTL2Port);
 					MTL3Server.getInstance().forwardRequest(str,MTL1Port);
 				}
-				bloop = MTL3Server.getInstance().createSRecord(parts[1], parts[2], parts[3], parts[4], parts[5], parts[6]);
+				
 			}
 			
 			else if(rep.contains("editRecord"))
 			{
 				String bleep = rep;
 				String parts[] = bleep.split("::");
+				bloop = MTL3Server.getInstance().editRecord(parts[2], parts[3], parts[4], parts[5]);
 				if(parts[0].contains("true"))
 				{
 					String str = rep.replace("true", "false");
 					MTL3Server.getInstance().forwardRequest(str,MTL2Port);
 					MTL3Server.getInstance().forwardRequest(str,MTL1Port);
 				}
-				bloop = MTL3Server.getInstance().editRecord(parts[1], parts[2], parts[3], parts[4]);
+				
 			}
 			
 			else if(rep.contains("GRCMethod"))
 			{
 				String bleep = rep;
 				String parts[] = bleep.split("::");
+				bloop = MTL3Server.getInstance().getRecordCounts(parts[2]);
 				if(parts[0].contains("true"))
 				{
 					String str = rep.replace("true", "false");
 					MTL3Server.getInstance().forwardRequest(str,MTL2Port);
 					MTL3Server.getInstance().forwardRequest(str,MTL1Port);
 				}
-				bloop = MTL3Server.getInstance().getRecordCounts(parts[1]);
+				
 			}
 			
 			else if(rep.contains("TRMethod"))
 			{
 				String bleep = rep;
 				String parts[] = bleep.split("::");
+				bloop = MTL3Server.getInstance().transferRecord(parts[2], parts[3], parts[4]);
 				if(parts[0].contains("true"))
 				{
 					String str = rep.replace("true", "false");
 					MTL3Server.getInstance().forwardRequest(str,MTL2Port);
 					MTL3Server.getInstance().forwardRequest(str,MTL1Port);
 				}
-				bloop = MTL3Server.getInstance().transferRecord(parts[1], parts[2], parts[3]);
+				
 			}
 			
 			System.out.println("Request Transferred over Reliable UDP");
@@ -346,7 +355,7 @@ public class MTL3Server {
 				public String call() throws Exception {
 					DatagramSocket ds = new DatagramSocket();
 					InetAddress aHost = InetAddress.getByName("localhost");
-					DatagramPacket request = new DatagramPacket(message, message.length, aHost, DDO3Port);
+					DatagramPacket request = new DatagramPacket(message, message.length, aHost, DDOPort3);
 					ds.send(request);
 					DatagramPacket reply1 = new DatagramPacket(buffer1, buffer1.length);
 					ds.receive(reply1);
@@ -363,7 +372,7 @@ public class MTL3Server {
 				public String call() throws Exception {
 					DatagramSocket ds = new DatagramSocket();
 					InetAddress aHost = InetAddress.getByName("localhost");
-					DatagramPacket request = new DatagramPacket(message, message.length, aHost, LVL3Port);
+					DatagramPacket request = new DatagramPacket(message, message.length, aHost, LVLPort3);
 					ds.send(request);
 					DatagramPacket reply2 = new DatagramPacket(buffer2, buffer2.length);
 					ds.receive(reply2);
@@ -397,9 +406,9 @@ public class MTL3Server {
 		String msg = "transferRecord::" + managerID + "::" + fullRecord;
 		
 		if(remoteServerName.equalsIgnoreCase("DDO"))
-			port = DDO3Port;
+			port = DDOPort3;
 		else
-			port = LVL3Port;
+			port = LVLPort3;
 		
 		DatagramSocket ds = null;
 		
@@ -443,6 +452,47 @@ public class MTL3Server {
 	public static void main(String[] args) throws Exception {
 		
 		getInstance().startServer();
+		
+		
+		DatagramSocket ddo = null;
+		try{
+			
+			ddo = new DatagramSocket(MTLPort3);
+			while(true){
+				String bloop = "";
+				byte[] buffer = new byte[1000];
+				
+				DatagramPacket request = new DatagramPacket(buffer, buffer.length);
+				ddo.receive(request);
+				
+				if(data(buffer).toString().equals("getRecordCounts"))
+					bloop = "MTL "+ String.valueOf(MTL3Server.getInstance().getSize()) + ", "; 
+				
+				else if(data(buffer).toString().contains("transferRecord"))
+				{
+					String bleep = data(buffer).toString();
+					String parts[] = bleep.split("::");
+					if(parts[2].startsWith("TR"))
+						bloop = MTL3Server.getInstance().createTRecord(parts[1], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8]);
+					else
+						bloop = MTL3Server.getInstance().createSRecord(parts[1], parts[3], parts[4], parts[5], parts[6], parts[7]);
+				}
+				
+				byte[] blah = bloop.getBytes();
+				DatagramPacket reply = new DatagramPacket(blah,blah.length, request.getAddress(), request.getPort());
+				ddo.send(reply);
+				
+			}
+		}catch(SocketException e){
+			System.out.println("Socket Exception: "+e);
+		}
+		catch(IOException e){
+			System.out.println("IO Exception: "+e);
+		}
+		finally{
+			if(ddo != null)
+				ddo.close();
+		}
 	}
 	
 	private void startServer() {
@@ -547,7 +597,7 @@ public class MTL3Server {
 			byte[] bloop = msg.getBytes();
 			client.sendReliablePacket(bloop);
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(500);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -569,5 +619,19 @@ public class MTL3Server {
 		catch (IllegalAccessException e) {} //Given handler class can't be accessed.
 		catch(IOException e) {}
 	}
-	
+	private static StringBuilder data(byte[] a) {
+		// TODO Auto-generated method stub
+		
+		
+		if(a==null)
+		return null;
+		StringBuilder ret=new StringBuilder();
+		int i=0;
+		while(a[i] !=0) {
+			
+			ret.append((char) a[i]);
+			i++;
+		}
+		return ret;
+	}
 }
