@@ -128,7 +128,8 @@ public class DDO1Server {
 			{
 				String bleep = rep;
 				String parts[] = bleep.split("::");
-				if(parts[0].equalsIgnoreCase("true"))
+				System.out.println("parts 0 :"+parts[0]);
+				if(parts[0].contains("true"))
 				{
 					String str = rep.replace("true", "false");
 					DDO1Server.getInstance().forwardRequest(str,DDO2Port);
@@ -142,7 +143,7 @@ public class DDO1Server {
 			{
 				String bleep = rep;
 				String parts[] = bleep.split("::");
-				if(parts[0].equalsIgnoreCase("true"))
+				if(parts[0].contains("true"))
 				{
 					String str = rep.replace("true", "false");
 					DDO1Server.getInstance().forwardRequest(str,DDO2Port);
@@ -155,7 +156,7 @@ public class DDO1Server {
 			{
 				String bleep = rep;
 				String parts[] = bleep.split("::");
-				if(parts[0].equalsIgnoreCase("true"))
+				if(parts[0].contains("true"))
 				{
 					String str = rep.replace("true", "false");
 					DDO1Server.getInstance().forwardRequest(str,DDO2Port);
@@ -168,7 +169,7 @@ public class DDO1Server {
 			{
 				String bleep = rep;
 				String parts[] = bleep.split("::");
-				if(parts[0].equalsIgnoreCase("true"))
+				if(parts[0].contains("true"))
 				{
 					String str = rep.replace("true", "false");
 					DDO1Server.getInstance().forwardRequest(str,DDO2Port);
@@ -181,7 +182,7 @@ public class DDO1Server {
 			{
 				String bleep = rep;
 				String parts[] = bleep.split("::");
-				if(parts[0].equalsIgnoreCase("true"))
+				if(parts[0].contains("true"))
 				{
 					String str = rep.replace("true", "false");
 					DDO1Server.getInstance().forwardRequest(str,DDO2Port);

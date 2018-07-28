@@ -128,7 +128,7 @@ public class MTL1Server {
 			{
 				String bleep = rep;
 				String parts[] = bleep.split("::");
-				if(parts[0].equalsIgnoreCase("true"))
+				if(parts[0].contains("true"))
 				{
 					String str = rep.replace("true", "false");
 					MTL1Server.getInstance().forwardRequest(str,MTL2Port);
@@ -142,7 +142,7 @@ public class MTL1Server {
 			{
 				String bleep = rep;
 				String parts[] = bleep.split("::");
-				if(parts[0].equalsIgnoreCase("true"))
+				if(parts[0].contains("true"))
 				{
 					String str = rep.replace("true", "false");
 					MTL1Server.getInstance().forwardRequest(str,MTL2Port);
@@ -155,7 +155,7 @@ public class MTL1Server {
 			{
 				String bleep = rep;
 				String parts[] = bleep.split("::");
-				if(parts[0].equalsIgnoreCase("true"))
+				if(parts[0].contains("true"))
 				{
 					String str = rep.replace("true", "false");
 					MTL1Server.getInstance().forwardRequest(str,MTL2Port);
@@ -168,7 +168,7 @@ public class MTL1Server {
 			{
 				String bleep = rep;
 				String parts[] = bleep.split("::");
-				if(parts[0].equalsIgnoreCase("true"))
+				if(parts[0].contains("true"))
 				{
 					String str = rep.replace("true", "false");
 					MTL1Server.getInstance().forwardRequest(str,MTL2Port);
@@ -181,7 +181,7 @@ public class MTL1Server {
 			{
 				String bleep = rep;
 				String parts[] = bleep.split("::");
-				if(parts[0].equalsIgnoreCase("true"))
+				if(parts[0].contains("true"))
 				{
 					String str = rep.replace("true", "false");
 					MTL1Server.getInstance().forwardRequest(str,MTL2Port);
