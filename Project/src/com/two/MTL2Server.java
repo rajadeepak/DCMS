@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 import javax.jms.JMSException;
 import javax.naming.NamingException;
 
+import com.main.ElectionTriggerListener;
 import com.main.HeartbeatGenerator;
 import com.main.LogManager;
 import com.main.Record;
@@ -441,15 +442,16 @@ public class MTL2Server {
 
 	public static void main(String[] args) throws Exception {
 		
-		try {
-			executor.scheduleAtFixedRate(new HeartbeatGenerator("MTL2"), 1 , 5, TimeUnit.SECONDS);
-		} catch (NamingException | JMSException | IOException e) {
-			e.printStackTrace();
-		}
 		getInstance().startServer();
 	}
 	
 	private void startServer() {
+		try {
+			executor.scheduleAtFixedRate(new HeartbeatGenerator("MTL2"), 1 , 5, TimeUnit.SECONDS);
+			exec.execute(new ElectionTriggerListener("MTL2"));
+		} catch (NamingException | JMSException | IOException e) {
+			e.printStackTrace();
+		}
 		try {
 			server = new RUDPServer(MTL3Port);
 			server.setPacketHandler(MyPacketHandler.class);

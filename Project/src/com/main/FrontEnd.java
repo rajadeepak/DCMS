@@ -279,23 +279,25 @@ public class FrontEnd extends DCMSPOA{
 	
 	public int getPort(String ManagerID)
 	{
-		int port;
+		int port = 0;
 
 		String ManagerIDTrim = ManagerID.substring(0, 3);
 		
 		switch(ManagerIDTrim) {
 		case "MTL":
+			port = ConfigurationBean.getInstance().master_servers.get("MTL");
 			break;
 		case "LVL":
+			port = ConfigurationBean.getInstance().master_servers.get("LVL");
 			break;
 		case "DDO":
+			port = ConfigurationBean.getInstance().master_servers.get("DDO");
 			break;
 		default:
 			System.out.println("bloop haha");
 			break;
 		}
 		
-		port = DDO1Port;
 		return port;
 	}
 }

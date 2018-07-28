@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 import javax.jms.JMSException;
 import javax.naming.NamingException;
 
+import com.main.ElectionTriggerListener;
 import com.main.HeartbeatGenerator;
 import com.main.LogManager;
 import com.main.Record;
@@ -440,16 +441,17 @@ public class LVL2Server {
 
 	public static void main(String[] args) throws Exception {
 		
-		try {
-			executor.scheduleAtFixedRate(new HeartbeatGenerator("LVL2"), 1 , 5, TimeUnit.SECONDS);
-		} catch (NamingException | JMSException | IOException e) {
-			e.printStackTrace();
-		}
 		getInstance().startServer();
 	
 	}
 	
 	private void startServer() {
+		try {
+			executor.scheduleAtFixedRate(new HeartbeatGenerator("LVL2"), 1 , 5, TimeUnit.SECONDS);
+			exec.execute(new ElectionTriggerListener("LVL2"));
+		} catch (NamingException | JMSException | IOException e) {
+			e.printStackTrace();
+		}
 		try {
 			server = new RUDPServer(LVL2Port);
 			server.setPacketHandler(MyPacketHandler.class);
