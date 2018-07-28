@@ -453,7 +453,7 @@ public class MTL2Server {
 			e.printStackTrace();
 		}
 		try {
-			server = new RUDPServer(MTL3Port);
+			server = new RUDPServer(MTL2Port);
 			server.setPacketHandler(MyPacketHandler.class);
 			server.start();
 		}
