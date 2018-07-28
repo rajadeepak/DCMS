@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 import javax.jms.JMSException;
 import javax.naming.NamingException;
 
+import com.main.ElectionTriggerListener;
 import com.main.HeartbeatGenerator;
 import com.main.LogManager;
 import com.main.Record;
@@ -58,7 +59,7 @@ public class DDO2Server {
 	public static String rudpResponse = "";
 	
 	ExecutorService exec = Executors.newFixedThreadPool(10);
-    private static ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+    ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
     
 	private static DDO2Server serverInstance = new DDO2Server();
 	
@@ -441,15 +442,16 @@ public class DDO2Server {
 
 	public static void main(String[] args) throws Exception {
 		
-		try {
-			executor.scheduleAtFixedRate(new HeartbeatGenerator("DDO1"), 1 , 5, TimeUnit.SECONDS);
-		} catch (NamingException | JMSException | IOException e) {
-			e.printStackTrace();
-		}
 		getInstance().startServer();
 	}
 	
 	private void startServer() {
+		try {
+			executor.scheduleAtFixedRate(new HeartbeatGenerator("DDO2"), 1 , 5, TimeUnit.SECONDS);
+			exec.execute(new ElectionTriggerListener("DDO2"));
+		} catch (NamingException | JMSException | IOException e) {
+			e.printStackTrace();
+		}
 		try {
 			server = new RUDPServer(DDO2Port);
 			server.setPacketHandler(MyPacketHandler.class);

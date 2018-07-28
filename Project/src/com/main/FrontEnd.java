@@ -198,11 +198,32 @@ public class FrontEnd extends DCMSPOA{
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
 		FrontEnd feserver = new FrontEnd();
-		feserver.start();
+		feserver.startHeartBeatListener();
+		feserver.startVotingListener();
 
 	}
 	
-	private void start(){
+	private void startVotingListener() {
+		
+		try {
+			Context context = new InitialContext(ConfigurationBean.getInstance().getEnv());
+			ConnectionFactory factory = (ConnectionFactory) context.lookup("myJmsFactory");
+			Destination destination = (Destination) context.lookup("queue/voting");
+			
+			Connection connection = factory.createConnection();
+	        connection.start();
+
+	        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+	        MessageConsumer consumer = session.createConsumer(destination);
+	        consumer.setMessageListener(VoteListener.getInstance());
+			
+		} catch (NamingException |JMSException e) {
+			e.printStackTrace();
+		} 
+		
+	}
+
+	private void startHeartBeatListener(){
 		
 		try {
 			Context context = new InitialContext(ConfigurationBean.getInstance().getEnv());
